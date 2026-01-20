@@ -3,18 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>CO₂ Tolerance Timer + Tendon Routine</title>
+  <title>Breath Timer (Fully Editable Steps)</title>
   <style>
     :root{
       --bg:#0b0f17;
+      --card:#121a2a;
       --text:#e8eefc;
       --muted:#a8b3cc;
+      --line:#22314f;
       --accent:#6aa9ff;
-      --accent2:#7cffc1;
+      --good:#7cffc1;
       --warn:#ffcc66;
       --danger:#ff6a6a;
       --shadow: 0 10px 30px rgba(0,0,0,.35);
-      --radius: 18px;
+      --r:18px;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -26,44 +28,57 @@
                   var(--bg);
       color:var(--text);
     }
-    .wrap{max-width:980px;margin:0 auto;padding:18px 14px 40px}
+    .wrap{max-width:1050px;margin:0 auto;padding:18px 14px 40px}
     header{display:flex;gap:12px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}
     h1{margin:0;font-size:22px;letter-spacing:.2px}
-    .subtitle{margin:2px 0 0;color:var(--muted);font-size:13px}
-
-    .tabs{display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:6px}
-    .tab{border:0;background:transparent;color:var(--muted);padding:10px 12px;border-radius:999px;cursor:pointer;font-weight:600;font-size:13px}
-    .tab.active{background:rgba(106,169,255,.18);color:var(--text);border:1px solid rgba(106,169,255,.35)}
+    .sub{margin:2px 0 0;color:var(--muted);font-size:13px}
 
     .grid{display:grid;grid-template-columns:1fr;gap:12px}
-    @media (min-width:860px){.grid{grid-template-columns:1.1fr .9fr}}
+    @media(min-width:920px){.grid{grid-template-columns:1.05fr .95fr}}
 
-    .card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
-      border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-    .card .hd{padding:14px 14px 10px;display:flex;justify-content:space-between;align-items:center;gap:10px;
-      border-bottom:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.12)}
-    .card .hd h2{margin:0;font-size:14px;letter-spacing:.2px}
-    .card .bd{padding:14px}
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:var(--r);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .hd{
+      padding:14px 14px 10px;
+      display:flex;justify-content:space-between;align-items:center;gap:10px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      background:rgba(0,0,0,.12);
+    }
+    .hd h2{margin:0;font-size:14px;letter-spacing:.2px}
+    .bd{padding:14px}
+
+    .pill{
+      display:inline-flex;gap:8px;align-items:center;
+      padding:8px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03);
+      font-size:12px;color:var(--muted);
+      white-space:nowrap;
+    }
+    .pill b{color:var(--text)}
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .row > *{flex:1 1 auto}
-    .muted{color:var(--muted);font-size:12px}
     .sep{height:10px}
 
-    .big{font-variant-numeric:tabular-nums;font-size:54px;line-height:1;letter-spacing:.5px;margin:0}
-    .phase{margin-top:6px;font-size:15px;color:var(--muted);letter-spacing:.2px}
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);font-size:12px;color:var(--muted);white-space:nowrap}
-    .pill b{color:var(--text);font-weight:700}
+    .big{
+      font-variant-numeric: tabular-nums;
+      font-size:54px;line-height:1;margin:0;
+      letter-spacing:.5px;
+    }
+    .phase{margin-top:6px;color:var(--muted);font-size:15px}
 
-    .btnbar{display:flex;gap:10px;flex-wrap:wrap}
     button{
       border:1px solid rgba(255,255,255,.12);
       background:rgba(255,255,255,.06);
       color:var(--text);
       padding:12px 14px;border-radius:14px;
-      cursor:pointer;font-weight:700;letter-spacing:.2px;
-      transition:transform .04s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
+      cursor:pointer;font-weight:800;letter-spacing:.2px;
       user-select:none;
+      transition: transform .04s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
     }
     button:active{transform:scale(.99)}
     button.primary{background:rgba(106,169,255,.22);border-color:rgba(106,169,255,.40)}
@@ -71,320 +86,335 @@
     button.warn{background:rgba(255,204,102,.15);border-color:rgba(255,204,102,.35)}
     button.danger{background:rgba(255,106,106,.16);border-color:rgba(255,106,106,.35)}
     button:disabled{opacity:.45;cursor:not-allowed}
-    .tinybtn{padding:9px 10px;border-radius:12px;font-size:12px;font-weight:800}
+    .tiny{padding:9px 10px;border-radius:12px;font-size:12px;font-weight:900}
 
     .control{
       display:grid;
       grid-template-columns:1fr auto;
       gap:10px;align-items:center;
       padding:10px 12px;border-radius:14px;
-      background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
     }
-    .control label{font-weight:700;font-size:13px}
-    .control .val{font-variant-numeric:tabular-nums;font-weight:800;color:var(--text);min-width:120px;text-align:right}
+    .control label{font-weight:800;font-size:13px}
+    .muted{color:var(--muted);font-size:12px;line-height:1.35}
+    .val{font-variant-numeric:tabular-nums;font-weight:900;min-width:110px;text-align:right}
     input[type="range"]{width:100%}
     input[type="checkbox"]{transform:scale(1.15)}
+
     textarea{
-      width:100%;min-height:160px;padding:12px;border-radius:14px;
+      width:100%;min-height:170px;padding:12px;border-radius:14px;
       border:1px solid rgba(255,255,255,.12);
       background:rgba(0,0,0,.18);color:var(--text);
-      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+      font-family: ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
       font-size:12px;
     }
 
     .list{display:flex;flex-direction:column;gap:8px}
-    .item{
-      display:flex;justify-content:space-between;gap:10px;align-items:flex-start;
-      padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+    .step{
+      display:grid;
+      grid-template-columns: 1fr 120px 120px auto;
+      gap:8px;
+      padding:10px 10px;border-radius:14px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+      align-items:center;
     }
-    .item .name{font-weight:800;font-size:13px}
-    .item .note{color:var(--muted);font-size:12px;margin-top:2px}
-    .item .rt{color:var(--muted);font-size:12px;white-space:nowrap}
-    .hidden{display:none !important;}
-    .footerNote{margin-top:10px;color:var(--muted);font-size:12px;line-height:1.35}
-    .hintBox{
+    @media(max-width:650px){
+      .step{grid-template-columns:1fr 120px;grid-auto-rows:auto}
+      .step .actions{grid-column:1/-1;justify-content:flex-end}
+      .step .type{grid-column:1/2}
+      .step .sec{grid-column:2/3}
+    }
+    .step input[type="text"], .step input[type="number"], .step select{
+      width:100%;
+      padding:10px 10px;border-radius:12px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.18);
+      color:var(--text);
+      font-weight:800;
+    }
+    .step input[type="number"]{font-variant-numeric:tabular-nums}
+    .actions{display:flex;gap:8px;align-items:center;justify-content:flex-end}
+    .badge{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:28px;height:28px;border-radius:10px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.18);
+      color:var(--muted);
+      font-weight:900;
+      font-variant-numeric:tabular-nums;
+    }
+    .hint{
       padding:10px 12px;border-radius:14px;
-      background:rgba(124,255,193,.08);
-      border:1px solid rgba(124,255,193,.20);
-      color:var(--muted);font-size:12px;line-height:1.35
+      background:rgba(106,169,255,.10);
+      border:1px solid rgba(106,169,255,.22);
+      color:var(--muted);
+      font-size:12px;line-height:1.35;
     }
-    code.inline{font-family:ui-monospace,Menlo,Monaco,Consolas,monospace;font-size:12px;color:var(--text)}
+    .footer{
+      margin-top:10px;color:var(--muted);font-size:12px;line-height:1.35
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <div>
-        <h1>CO₂ Tolerance Timer</h1>
-        <div class="subtitle">Now supports per-cycle arrays via JSON import.</div>
-      </div>
-      <div class="tabs" role="tablist" aria-label="Sections">
-        <button class="tab active" id="tab-timer" role="tab" aria-selected="true">Timer</button>
-        <button class="tab" id="tab-tendon" role="tab" aria-selected="false">Tendon Routine</button>
+        <h1>Breath Timer</h1>
+        <div class="sub">Edit every step (label + duration), then Start. Use Prev/Next to jump steps anytime.</div>
       </div>
     </header>
 
-    <section id="view-timer">
-      <div class="grid">
-        <div class="card">
-          <div class="hd">
-            <h2>Session</h2>
-            <span class="pill"><span>Cycle</span> <b id="cycle">0</b></span>
-          </div>
-          <div class="bd">
-            <p class="big" id="phaseTime">00:00</p>
-            <div class="phase" id="phaseLabel">Ready</div>
-
-            <div class="sep"></div>
-            <div class="row">
-              <span class="pill"><span>Total left</span> <b id="totalLeft">00:00</b></span>
-              <span class="pill"><span>Elapsed</span> <b id="elapsed">00:00</b></span>
-              <span class="pill"><span>Status</span> <b id="status">Stopped</b></span>
-            </div>
-
-            <div class="sep"></div>
-            <div class="row">
-              <span class="pill"><span>Current hold</span> <b id="curHold">—</b></span>
-              <span class="pill"><span>Current rest</span> <b id="curRest">—</b></span>
-              <span class="pill"><span>Mode</span> <b id="mode">Single</b></span>
-            </div>
-
-            <div class="sep"></div>
-            <div class="btnbar">
-              <button class="primary" id="startBtn">Start</button>
-              <button class="good" id="pauseBtn" disabled>Pause</button>
-              <button class="good" id="resumeBtn" disabled>Resume</button>
-              <button class="danger" id="stopBtn" disabled>Stop</button>
-              <button class="tinybtn" id="resetSettingsBtn" title="Resets settings to defaults" style="margin-left:auto">Reset settings</button>
-            </div>
-
-            <div class="footerNote">
-              Safety: do this seated. Stop if you feel unwell. Don’t do breath holds in water or while driving.
-            </div>
-          </div>
+    <div class="grid">
+      <!-- TIMER -->
+      <div class="card">
+        <div class="hd">
+          <h2>Session</h2>
+          <span class="pill"><span>Step</span> <b id="stepNum">0/0</b></span>
         </div>
+        <div class="bd">
+          <p class="big" id="timeLeft">00:00</p>
+          <div class="phase" id="stepLabel">Ready</div>
 
-        <div class="card">
-          <div class="hd">
-            <h2>Settings</h2>
-            <span class="pill"><span>Saved</span> <b id="savedState">Yes</b></span>
+          <div class="sep"></div>
+          <div class="row">
+            <span class="pill"><span>Total left</span> <b id="totalLeft">00:00</b></span>
+            <span class="pill"><span>Elapsed</span> <b id="elapsed">00:00</b></span>
+            <span class="pill"><span>Status</span> <b id="status">Stopped</b></span>
           </div>
-          <div class="bd">
 
-            <div class="hintBox">
-              JSON arrays: set <code class="inline">holdSec</code> and/or <code class="inline">restSec</code> to arrays.
-              Example:<br>
-              <code class="inline">"holdSec":[35,40,45], "restSec":[30,25,20]</code><br>
-              The timer uses the next index each cycle and then holds at the last value.
-            </div>
-
-            <div class="sep"></div>
-
-            <div class="control">
-              <div>
-                <label for="holdSec">Hold time (seconds)</label>
-                <div class="muted">Slider controls single-value mode (JSON can override with arrays)</div>
-              </div>
-              <div class="val" id="holdVal">45s</div>
-              <input id="holdSec" type="range" min="10" max="120" step="5" />
-              <div></div>
-            </div>
-
-            <div class="sep"></div>
-
-            <div class="control">
-              <div>
-                <label for="restSec">Breathe/rest time (seconds)</label>
-                <div class="muted">Slider controls single-value mode (JSON can override with arrays)</div>
-              </div>
-              <div class="val" id="restVal">20s</div>
-              <input id="restSec" type="range" min="5" max="90" step="5" />
-              <div></div>
-            </div>
-
-            <div class="sep"></div>
-
-            <div class="control">
-              <div>
-                <label for="totalMin">Total workout duration (minutes)</label>
-              </div>
-              <div class="val" id="totalVal">8:00</div>
-              <input id="totalMin" type="range" min="3" max="20" step="1" />
-              <div></div>
-            </div>
-
-            <div class="sep"></div>
-
-            <div class="control">
-              <div>
-                <label>Hold cue</label>
-                <div class="muted">Wording for the hold phase</div>
-              </div>
-              <div class="val">
-                <label style="display:flex;gap:10px;align-items:center;justify-content:flex-end">
-                  <input type="checkbox" id="holdOnInhale" />
-                  <span style="font-weight:800">Hold on inhale</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="sep"></div>
-
-            <div class="control">
-              <div>
-                <label>Sound + vibration</label>
-                <div class="muted">Sound requires user interaction (Start/Resume) on many phones</div>
-              </div>
-              <div class="val" style="display:flex;gap:10px;justify-content:flex-end;align-items:center">
-                <label style="display:flex;gap:10px;align-items:center">
-                  <input type="checkbox" id="soundOn" />
-                  <span style="font-weight:800">Sound</span>
-                </label>
-                <label style="display:flex;gap:10px;align-items:center">
-                  <input type="checkbox" id="vibeOn" />
-                  <span style="font-weight:800">Vibe</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="sep"></div>
-
-            <div class="control">
-              <div>
-                <label for="volume">Volume</label>
-                <div class="muted">Only used if Sound is on</div>
-              </div>
-              <div class="val" id="volVal">70%</div>
-              <input id="volume" type="range" min="0" max="100" step="5" />
-              <div></div>
-            </div>
-
-            <div class="sep"></div>
-
-            <div class="row">
-              <button class="tinybtn" id="copySettingsBtn">Copy settings JSON</button>
-              <button class="tinybtn" id="loadSettingsBtn">Load JSON</button>
-            </div>
-
-            <div class="sep"></div>
-            <textarea id="jsonBox" spellcheck="false" placeholder='Paste JSON here and tap "Load JSON".'></textarea>
+          <div class="sep"></div>
+          <div class="row">
+            <span class="pill"><span>Mode</span> <b id="mode">Loop</b></span>
+            <span class="pill"><span>Sound</span> <b id="soundState">Off</b></span>
+            <span class="pill"><span>Vibe</span> <b id="vibeState">On</b></span>
           </div>
-        </div>
 
-        <div class="card" style="grid-column:1/-1">
-          <div class="hd">
-            <h2>Log</h2>
-            <span class="pill"><span>Events</span> <b id="logCount">0</b></span>
+          <div class="sep"></div>
+          <div class="row">
+            <button class="primary" id="startBtn">Start</button>
+            <button class="good" id="pauseBtn" disabled>Pause</button>
+            <button class="good" id="resumeBtn" disabled>Resume</button>
+            <button class="danger" id="stopBtn" disabled>Stop</button>
           </div>
-          <div class="bd">
-            <div class="list" id="log"></div>
+
+          <div class="sep"></div>
+          <div class="row">
+            <button class="warn" id="prevBtn" disabled>Prev</button>
+            <button class="warn" id="nextBtn" disabled>Next</button>
+            <button class="tiny" id="restartStepBtn" disabled>Restart step</button>
+          </div>
+
+          <div class="footer">
+            Safety: do this seated. Stop if dizzy/tingly/vision changes. No breath holds in water or while driving.
           </div>
         </div>
       </div>
-    </section>
 
-    <section id="view-tendon" class="hidden">
-      <div class="grid">
-        <div class="card" style="grid-column:1/-1">
-          <div class="hd">
-            <h2>Tendon Routine (editable)</h2>
-            <span class="pill"><span>Editable</span> <b>Yes</b></span>
+      <!-- SETTINGS -->
+      <div class="card">
+        <div class="hd">
+          <h2>Settings</h2>
+          <span class="pill"><span>Saved</span> <b id="saved">Yes</b></span>
+        </div>
+        <div class="bd">
+          <div class="control">
+            <div>
+              <label>Mode</label>
+              <div class="muted">Loop repeats your step list until total minutes. Run once stops at end of list.</div>
+            </div>
+            <div class="val">
+              <label style="display:flex;gap:10px;align-items:center;justify-content:flex-end">
+                <input type="checkbox" id="loopMode" />
+                <span style="font-weight:900">Loop</span>
+              </label>
+            </div>
           </div>
-          <div class="bd">
-            <div class="muted" style="margin-bottom:10px">
-              Simple checklist you can tweak anytime.
+
+          <div class="sep"></div>
+
+          <div class="control">
+            <div>
+              <label for="totalMin">Total duration (minutes)</label>
+              <div class="muted">Only used in Loop mode.</div>
             </div>
+            <div class="val" id="totalVal">8:00</div>
+            <input id="totalMin" type="range" min="3" max="30" step="1" />
+            <div></div>
+          </div>
 
-            <div class="list" id="tendonList"></div>
+          <div class="sep"></div>
 
-            <div class="sep"></div>
-            <div class="row">
-              <button class="tinybtn" id="tendonAdd">Add item</button>
-              <button class="tinybtn danger" id="tendonClear">Clear all</button>
-              <button class="tinybtn" id="tendonCopy">Copy routine JSON</button>
-              <button class="tinybtn" id="tendonLoad">Load JSON</button>
+          <div class="control">
+            <div>
+              <label>Sound + vibration</label>
+              <div class="muted">Sound works best after tapping Start/Resume (phone browser rule).</div>
             </div>
+            <div class="val" style="display:flex;gap:14px;justify-content:flex-end;align-items:center">
+              <label style="display:flex;gap:10px;align-items:center">
+                <input type="checkbox" id="soundOn" />
+                <span style="font-weight:900">Sound</span>
+              </label>
+              <label style="display:flex;gap:10px;align-items:center">
+                <input type="checkbox" id="vibeOn" checked />
+                <span style="font-weight:900">Vibe</span>
+              </label>
+            </div>
+          </div>
 
-            <div class="sep"></div>
-            <textarea id="tendonJson" spellcheck="false" placeholder='Paste routine JSON here and tap "Load JSON".'></textarea>
+          <div class="sep"></div>
+
+          <div class="control">
+            <div>
+              <label for="volume">Volume</label>
+              <div class="muted">Only used if Sound is enabled.</div>
+            </div>
+            <div class="val" id="volVal">70%</div>
+            <input id="volume" type="range" min="0" max="100" step="5" />
+            <div></div>
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="row">
+            <button class="tiny" id="exportBtn">Export routine JSON</button>
+            <button class="tiny" id="importBtn">Import routine JSON</button>
+            <button class="tiny danger" id="resetBtn">Reset defaults</button>
+          </div>
+
+          <div class="sep"></div>
+          <textarea id="jsonBox" spellcheck="false" placeholder="Routine JSON shows here. Paste JSON then tap Import."></textarea>
+
+          <div class="sep"></div>
+          <div class="hint">
+            Keyboard shortcuts (desktop): <b>Space</b>=start/pause/resume • <b>N</b>=next • <b>P</b>=prev • <b>S</b>=stop
           </div>
         </div>
       </div>
-    </section>
+
+      <!-- STEP EDITOR -->
+      <div class="card" style="grid-column:1/-1">
+        <div class="hd">
+          <h2>Step Editor (label + duration + type)</h2>
+          <span class="pill"><span>Steps</span> <b id="stepCount">0</b></span>
+        </div>
+        <div class="bd">
+          <div class="row">
+            <button class="tiny" id="addStepBtn">Add step</button>
+            <button class="tiny" id="addHoldRestBtn">Add hold+rest pair</button>
+          </div>
+
+          <div class="sep"></div>
+          <div class="list" id="steps"></div>
+
+          <div class="sep"></div>
+          <div class="hint">
+            Tip: For CO₂ tolerance, a safe pattern is longer normal breathing early, then gradual reduction. Keep holds modest and stop if symptomatic.
+          </div>
+        </div>
+      </div>
+
+      <!-- LOG -->
+      <div class="card" style="grid-column:1/-1">
+        <div class="hd">
+          <h2>Log</h2>
+          <span class="pill"><span>Events</span> <b id="logCount">0</b></span>
+        </div>
+        <div class="bd">
+          <div class="list" id="log"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
-    /***********************
-     * Utilities
-     ***********************/
+    /***************
+     * Helpers
+     ***************/
     const $ = (id) => document.getElementById(id);
     const pad2 = (n) => String(n).padStart(2,'0');
-    const clamp = (x,min,max) => Math.min(max, Math.max(min,x));
-    function fmtMMSS(totalSec){
-      totalSec = Math.max(0, Math.floor(totalSec));
-      const m = Math.floor(totalSec/60);
-      const s = totalSec%60;
+    function fmtMMSS(sec){
+      sec = Math.max(0, Math.floor(sec));
+      const m = Math.floor(sec/60);
+      const s = sec%60;
       return `${pad2(m)}:${pad2(s)}`;
     }
-    function fmtMSS(totalSec){
-      totalSec = Math.max(0, Math.floor(totalSec));
-      const m = Math.floor(totalSec/60);
-      const s = totalSec%60;
+    function fmtMSS(sec){
+      sec = Math.max(0, Math.floor(sec));
+      const m = Math.floor(sec/60);
+      const s = sec%60;
       return `${m}:${pad2(s)}`;
     }
-    function nowMs(){ return performance.now(); }
+    function clamp(x,min,max){ return Math.min(max, Math.max(min, x)); }
 
-    /***********************
-     * Defaults + storage
-     ***********************/
-    const DEFAULTS = {
-      holdSec: 45,
-      restSec: 20,
+    /***************
+     * Storage keys
+     ***************/
+    const KEY_SETTINGS = "breath_timer_settings_v1";
+    const KEY_ROUTINE  = "breath_timer_routine_v1";
+    const KEY_LOG      = "breath_timer_log_v1";
+
+    /***************
+     * Default routine
+     ***************/
+    function defaultRoutine(){
+      // Safer CO2-style: 45s holds, long breathing early, gradual decrease
+      return {
+        name: "CO2 Safe 8m (45s hold, decreasing breathe)",
+        loop: true,
+        totalMin: 8,
+        steps: [
+          { label:"Breathe (Cycle 1)", sec:75, type:"rest" },
+          { label:"Hold (45s)",        sec:45, type:"hold" },
+          { label:"Breathe (Cycle 2)", sec:70, type:"rest" },
+          { label:"Hold (45s)",        sec:45, type:"hold" },
+          { label:"Breathe (Cycle 3)", sec:65, type:"rest" },
+          { label:"Hold (45s)",        sec:45, type:"hold" },
+          { label:"Breathe (Cycle 4)", sec:60, type:"rest" },
+          { label:"Hold (45s)",        sec:45, type:"hold" },
+          { label:"Breathe (Cycle 5)", sec:55, type:"rest" },
+          { label:"Hold (45s)",        sec:45, type:"hold" },
+          { label:"Breathe (Cycle 6)", sec:50, type:"rest" },
+          { label:"Hold (45s)",        sec:45, type:"hold" }
+        ]
+      };
+    }
+
+    /***************
+     * Settings state
+     ***************/
+    const settings = {
+      loop: true,
       totalMin: 8,
-      holdOnInhale: true,
       soundOn: false,
       vibeOn: true,
       volume: 70
     };
 
-    const STORAGE_KEY = "co2_timer_settings_v3";
-    const TIMER_LOG_KEY = "co2_timer_log_v2";
+    /***************
+     * Routine state
+     ***************/
+    let routine = defaultRoutine();
 
-    /***********************
-     * Timer State
-     ***********************/
+    /***************
+     * Timer runtime state
+     ***************/
     const timer = {
-      running: false,
-      paused: false,
-      phase: "ready", // ready | prep | rest | hold | done
-      cycle: 0,       // displayed cycle count starts at 1 when first rest begins
-      totalTargetSec: 0,
-      elapsedSec: 0,
-      phaseRemainingSec: 0,
-
-      // per-cycle schedule (Option 2)
-      schedule: {
-        mode: "single", // "single" | "array"
-        holdList: null, // number[] or null
-        restList: null, // number[] or null
-        holdSingle: 0,
-        restSingle: 0
-      },
-
-      // internal timekeeping
-      lastTickMs: 0,
-      accumMs: 0,
-
-      // current phase plan
-      phasePlan: null, // {name, durSec, kind}
-
-      // audio
-      audio: null
+      running:false,
+      paused:false,
+      stepIndex:0,
+      remaining:0,
+      elapsed:0,
+      totalTarget:0, // only used in loop mode
+      lastTick:0,
+      accMs:0,
+      audio:null
     };
 
-    /***********************
-     * Audio
-     ***********************/
+    /***************
+     * Audio + vibration
+     ***************/
     function ensureAudio(){
       if (timer.audio) return timer.audio;
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -394,792 +424,693 @@
       applyVolume();
       return timer.audio;
     }
-
     function applyVolume(){
-      const vol = clamp(+$("volume").value, 0, 100) / 100;
+      const vol = clamp(+settings.volume, 0, 100) / 100;
       $("volVal").textContent = `${Math.round(vol*100)}%`;
       if (timer.audio) timer.audio.gain.gain.value = vol * 0.35;
     }
-
-    function beep(pattern="short"){
-      if (!$("soundOn").checked) return;
+    function beep(kind="phase"){
+      if (!settings.soundOn) return;
       const { ctx, gain } = ensureAudio();
       if (ctx.state === "suspended") ctx.resume().catch(()=>{});
       const t0 = ctx.currentTime;
-
-      const seq = (pattern === "start") ? [0, .07, .14] :
-                  (pattern === "phase") ? [0, .08] :
-                  (pattern === "end") ? [0, .12, .24, .36] :
-                  [0];
-
-      seq.forEach(() => {
+      const seq = (kind==="start") ? [0,.07,.14] : (kind==="end") ? [0,.12,.24,.36] : [0,.08];
+      seq.forEach((dt, i) => {
         const o = ctx.createOscillator();
         o.type = "sine";
-        o.frequency.value = (pattern === "end") ? 880 : (pattern === "start" ? 740 : 660);
+        o.frequency.value = (kind==="end") ? 880 : (kind==="start") ? 740 : 660;
         o.connect(gain);
-        const on = ctx.currentTime + seq.shift();
+        const on = t0 + dt;
         const off = on + 0.10;
         try{ o.start(on); o.stop(off); }catch(e){}
       });
     }
-
     function vibrate(ms){
-      if (!$("vibeOn").checked) return;
+      if (!settings.vibeOn) return;
       if (!navigator.vibrate) return;
       try{ navigator.vibrate(ms); }catch(e){}
     }
 
-    /***********************
+    /***************
      * Logging
-     ***********************/
-    function addLog(title, detail){
+     ***************/
+    function addLog(title, detail=""){
       const el = document.createElement("div");
-      el.className = "item";
+      el.className = "card";
+      el.style.borderRadius = "14px";
+      el.style.boxShadow = "none";
+      el.style.background = "rgba(255,255,255,.03)";
+      el.style.border = "1px solid rgba(255,255,255,.08)";
+
+      const bd = document.createElement("div");
+      bd.className = "bd";
+      bd.style.padding = "10px 12px";
+
+      const top = document.createElement("div");
+      top.style.display="flex";
+      top.style.justifyContent="space-between";
+      top.style.gap="10px";
+
       const left = document.createElement("div");
+      left.innerHTML = `<div style="font-weight:900">${escapeHtml(title)}</div>` +
+                       (detail ? `<div class="muted" style="margin-top:2px">${escapeHtml(detail)}</div>` : "");
+
       const right = document.createElement("div");
-      right.className = "rt";
-
-      const name = document.createElement("div");
-      name.className = "name";
-      name.textContent = title;
-
-      const note = document.createElement("div");
-      note.className = "note";
-      note.textContent = detail || "";
-
+      right.className="muted";
       const ts = new Date();
       right.textContent = ts.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit", second:"2-digit"});
 
-      left.appendChild(name);
-      if (detail) left.appendChild(note);
-      el.appendChild(left);
-      el.appendChild(right);
+      top.appendChild(left);
+      top.appendChild(right);
+      bd.appendChild(top);
+      el.appendChild(bd);
 
       const log = $("log");
       log.prepend(el);
-      while (log.children.length > 50) log.removeChild(log.lastChild);
+      while(log.children.length > 60) log.removeChild(log.lastChild);
       $("logCount").textContent = String(log.children.length);
+
       saveLog();
     }
-
-    function saveLog(){
-      const items = Array.from($("log").children).map(x => {
-        const name = x.querySelector(".name")?.textContent || "";
-        const note = x.querySelector(".note")?.textContent || "";
-        const rt = x.querySelector(".rt")?.textContent || "";
-        return { name, note, rt };
-      });
-      localStorage.setItem(TIMER_LOG_KEY, JSON.stringify(items));
+    function escapeHtml(s){
+      return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
     }
-
+    function saveLog(){
+      const items = Array.from($("log").children).map(card => {
+        const t = card.querySelector("div[style*='font-weight:900']")?.textContent || "";
+        const d = card.querySelector(".muted")?.textContent || "";
+        return { t, d };
+      });
+      localStorage.setItem(KEY_LOG, JSON.stringify(items));
+    }
     function loadLog(){
       try{
-        const raw = localStorage.getItem(TIMER_LOG_KEY);
-        if (!raw) return;
+        const raw = localStorage.getItem(KEY_LOG);
+        if(!raw) return;
         const items = JSON.parse(raw);
         $("log").innerHTML = "";
-        items.reverse().forEach(it => {
-          const el = document.createElement("div");
-          el.className = "item";
-          const left = document.createElement("div");
-          const right = document.createElement("div");
-          right.className = "rt";
-          right.textContent = it.rt || "";
-
-          const name = document.createElement("div");
-          name.className = "name";
-          name.textContent = it.name || "";
-          left.appendChild(name);
-
-          if (it.note){
-            const note = document.createElement("div");
-            note.className = "note";
-            note.textContent = it.note;
-            left.appendChild(note);
-          }
-
-          el.appendChild(left);
-          el.appendChild(right);
-          $("log").prepend(el);
-        });
-        $("logCount").textContent = String($("log").children.length);
+        items.reverse().forEach(x => addLog(x.t, x.d));
       }catch(e){}
     }
 
-    /***********************
-     * Settings load/save
-     ***********************/
-    function getSettings(){
-      return {
-        holdSec: +$("holdSec").value,
-        restSec: +$("restSec").value,
-        totalMin: +$("totalMin").value,
-        holdOnInhale: $("holdOnInhale").checked,
-        soundOn: $("soundOn").checked,
-        vibeOn: $("vibeOn").checked,
-        volume: +$("volume").value
-      };
+    /***************
+     * Save/load settings + routine
+     ***************/
+    function markSaved(saved){
+      $("saved").textContent = saved ? "Yes" : "No";
     }
 
-    function setSettings(s){
-      $("holdSec").value = clamp(s.holdSec ?? DEFAULTS.holdSec, 10, 120);
-      $("restSec").value = clamp(s.restSec ?? DEFAULTS.restSec, 5, 90);
-      $("totalMin").value = clamp(s.totalMin ?? DEFAULTS.totalMin, 3, 20);
-      $("holdOnInhale").checked = !!(s.holdOnInhale ?? DEFAULTS.holdOnInhale);
-      $("soundOn").checked = !!(s.soundOn ?? DEFAULTS.soundOn);
-      $("vibeOn").checked = !!(s.vibeOn ?? DEFAULTS.vibeOn);
-      $("volume").value = clamp(s.volume ?? DEFAULTS.volume, 0, 100);
-
-      syncSettingLabels();
-      applyVolume();
+    function saveAll(){
+      localStorage.setItem(KEY_SETTINGS, JSON.stringify(settings));
+      localStorage.setItem(KEY_ROUTINE, JSON.stringify(routine));
       markSaved(true);
+      syncUI();
     }
 
-    function syncSettingLabels(){
-      $("holdVal").textContent = `${+$("holdSec").value}s`;
-      $("restVal").textContent = `${+$("restSec").value}s`;
-      $("totalVal").textContent = fmtMSS((+$("totalMin").value)*60);
-      $("volVal").textContent = `${+$("volume").value}%`;
-    }
-
-    function markSaved(isSaved){
-      $("savedState").textContent = isSaved ? "Yes" : "No";
-    }
-
-    function saveSettings(){
-      const s = getSettings();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
-      markSaved(true);
-    }
-
-    function loadSettings(){
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return setSettings(DEFAULTS);
+    function loadAll(){
+      // settings
       try{
-        const s = JSON.parse(raw);
-        setSettings({ ...DEFAULTS, ...s });
+        const s = JSON.parse(localStorage.getItem(KEY_SETTINGS) || "null");
+        if (s && typeof s === "object"){
+          settings.loop = !!s.loop;
+          settings.totalMin = clamp(+s.totalMin || 8, 3, 30);
+          settings.soundOn = !!s.soundOn;
+          settings.vibeOn = (s.vibeOn === undefined) ? true : !!s.vibeOn;
+          settings.volume = clamp(+s.volume || 70, 0, 100);
+        }
+      }catch(e){}
+
+      // routine
+      try{
+        const r = JSON.parse(localStorage.getItem(KEY_ROUTINE) || "null");
+        if (r && typeof r === "object" && Array.isArray(r.steps)){
+          routine = sanitizeRoutine(r);
+        } else {
+          routine = defaultRoutine();
+        }
       }catch(e){
-        setSettings(DEFAULTS);
+        routine = defaultRoutine();
       }
+
+      // make routine reflect settings mode/duration by default (but user can override in JSON)
+      routine.loop = settings.loop;
+      routine.totalMin = settings.totalMin;
     }
 
-    /***********************
-     * Option 2: schedule parsing
-     ***********************/
-    function normalizeNumArray(x){
-      if (!Array.isArray(x)) return null;
-      const out = x.map(v => Number(v)).filter(v => Number.isFinite(v) && v > 0);
-      return out.length ? out : null;
-    }
-
-    function buildScheduleFromObject(obj){
-      // obj can contain holdSec/restSec as number OR array
-      const holdArr = normalizeNumArray(obj.holdSec);
-      const restArr = normalizeNumArray(obj.restSec);
-
-      const holdSingle = Number.isFinite(Number(obj.holdSec)) ? Number(obj.holdSec) : DEFAULTS.holdSec;
-      const restSingle = Number.isFinite(Number(obj.restSec)) ? Number(obj.restSec) : DEFAULTS.restSec;
-
-      const mode = (holdArr || restArr) ? "array" : "single";
-
-      return {
-        mode,
-        holdList: holdArr,
-        restList: restArr,
-        holdSingle: clamp(holdSingle, 5, 600),
-        restSingle: clamp(restSingle, 3, 600)
+    function sanitizeRoutine(r){
+      const out = {
+        name: String(r.name || "Routine"),
+        loop: !!r.loop,
+        totalMin: clamp(+r.totalMin || 8, 1, 300),
+        steps: []
       };
-    }
-
-    function getHoldForCycle(cycleIndex0){
-      // cycleIndex0: 0 for first hold/rest pair after prep
-      if (timer.schedule.mode !== "array"){
-        return timer.schedule.holdSingle;
+      (r.steps || []).forEach(st => {
+        const sec = clamp(Math.floor(+st.sec || 0), 1, 3600);
+        if (!sec) return;
+        out.steps.push({
+          label: String(st.label || "Step"),
+          sec,
+          type: (st.type === "hold" || st.type === "rest" || st.type === "custom") ? st.type : "custom"
+        });
+      });
+      if (out.steps.length === 0){
+        out.steps = defaultRoutine().steps;
       }
-      const list = timer.schedule.holdList;
-      if (!list || !list.length) return timer.schedule.holdSingle;
-      const idx = Math.min(cycleIndex0, list.length - 1);
-      return clamp(list[idx], 5, 600);
+      return out;
     }
 
-    function getRestForCycle(cycleIndex0){
-      if (timer.schedule.mode !== "array"){
-        return timer.schedule.restSingle;
+    /***************
+     * Step editor rendering
+     ***************/
+    function renderSteps(){
+      const box = $("steps");
+      box.innerHTML = "";
+      $("stepCount").textContent = String(routine.steps.length);
+
+      routine.steps.forEach((st, idx) => {
+        const row = document.createElement("div");
+        row.className = "step";
+
+        const badge = document.createElement("div");
+        badge.className = "badge";
+        badge.textContent = String(idx+1);
+
+        const label = document.createElement("input");
+        label.type = "text";
+        label.value = st.label;
+        label.placeholder = "Step label (e.g., Breathe, Hold, Recover...)";
+        label.addEventListener("input", () => {
+          st.label = label.value;
+          markSaved(false);
+          saveAll();
+        });
+
+        const sec = document.createElement("input");
+        sec.type = "number";
+        sec.min = "1";
+        sec.max = "3600";
+        sec.value = String(st.sec);
+        sec.className = "sec";
+        sec.addEventListener("input", () => {
+          st.sec = clamp(Math.floor(+sec.value || 1), 1, 3600);
+          sec.value = String(st.sec);
+          markSaved(false);
+          saveAll();
+        });
+
+        const type = document.createElement("select");
+        type.className = "type";
+        ["rest","hold","custom"].forEach(t => {
+          const opt = document.createElement("option");
+          opt.value = t;
+          opt.textContent = t.toUpperCase();
+          if (st.type === t) opt.selected = true;
+          type.appendChild(opt);
+        });
+        type.addEventListener("change", () => {
+          st.type = type.value;
+          markSaved(false);
+          saveAll();
+        });
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+
+        const up = document.createElement("button");
+        up.className = "tiny";
+        up.textContent = "↑";
+        up.title = "Move up";
+        up.disabled = (idx === 0);
+        up.addEventListener("click", () => {
+          moveStep(idx, idx-1);
+        });
+
+        const down = document.createElement("button");
+        down.className = "tiny";
+        down.textContent = "↓";
+        down.title = "Move down";
+        down.disabled = (idx === routine.steps.length-1);
+        down.addEventListener("click", () => {
+          moveStep(idx, idx+1);
+        });
+
+        const del = document.createElement("button");
+        del.className = "tiny danger";
+        del.textContent = "Delete";
+        del.addEventListener("click", () => {
+          routine.steps.splice(idx,1);
+          if (routine.steps.length === 0) routine.steps = defaultRoutine().steps;
+          // keep timer stepIndex valid
+          if (timer.stepIndex >= routine.steps.length) timer.stepIndex = routine.steps.length-1;
+          markSaved(false);
+          saveAll();
+          if (!timer.running) syncUI();
+        });
+
+        actions.appendChild(up);
+        actions.appendChild(down);
+        actions.appendChild(del);
+
+        // layout
+        row.appendChild(label);
+        row.appendChild(sec);
+        row.appendChild(type);
+        row.appendChild(actions);
+
+        // On small screens, badge is less valuable; keep it subtle by prefixing label
+        label.style.paddingLeft = "12px";
+        label.style.position = "relative";
+        label.style.backgroundImage = `linear-gradient(90deg, rgba(255,255,255,.08), rgba(255,255,255,0))`;
+        label.style.backgroundSize = "0 0";
+        label.insertAdjacentHTML("beforebegin", "");
+        // Add badge as first child (desktop spacing)
+        row.insertAdjacentElement("afterbegin", badge);
+
+        box.appendChild(row);
+      });
+    }
+
+    function moveStep(from, to){
+      if (to < 0 || to >= routine.steps.length) return;
+      const [x] = routine.steps.splice(from,1);
+      routine.steps.splice(to,0,x);
+
+      // adjust timer index if running so it tracks the same logical step
+      if (timer.running){
+        if (timer.stepIndex === from) timer.stepIndex = to;
+        else if (from < timer.stepIndex && to >= timer.stepIndex) timer.stepIndex -= 1;
+        else if (from > timer.stepIndex && to <= timer.stepIndex) timer.stepIndex += 1;
       }
-      const list = timer.schedule.restList;
-      if (!list || !list.length) return timer.schedule.restSingle;
-      const idx = Math.min(cycleIndex0, list.length - 1);
-      return clamp(list[idx], 3, 600);
+
+      markSaved(false);
+      saveAll();
+      if (!timer.running) syncUI();
     }
 
-    /***********************
-     * Timer Engine
-     ***********************/
-    function setStatus(text){ $("status").textContent = text; }
+    /***************
+     * Timer core
+     ***************/
+    function setStatus(s){ $("status").textContent = s; }
 
-    function cueTextForHold(){
-      return $("holdOnInhale").checked ? "Inhale, then HOLD" : "Exhale, then HOLD";
+    function currentStep(){
+      if (!routine.steps.length) return null;
+      return routine.steps[clamp(timer.stepIndex, 0, routine.steps.length-1)];
     }
 
-    function setModeUI(){
-      $("mode").textContent = (timer.schedule.mode === "array") ? "Array" : "Single";
-    }
-
-    function updateCurrentDurationsUI(){
-      // For cycle display, we show the "current" cycle's values (based on cycle number shown)
-      // cycle displayed starts at 1 when first rest begins, so cycleIndex0 = max(cycle-1,0)
-      const idx0 = Math.max(timer.cycle - 1, 0);
-      const h = getHoldForCycle(idx0);
-      const r = getRestForCycle(idx0);
-      $("curHold").textContent = `${h}s`;
-      $("curRest").textContent = `${r}s`;
-    }
-
-    function nextPhasePlan(){
-      // cycleIndex0: 0-based index for the schedule arrays
-      const cycleIndex0 = Math.max(timer.cycle - 1, 0);
-
-      if (timer.phase === "ready"){
-        timer.phase = "prep";
-        return { kind:"prep", name:"Get ready", durSec: 5 };
+    function setStepIndex(i){
+      if (!routine.steps.length) return;
+      if (settings.loop){
+        // wrap
+        const n = routine.steps.length;
+        timer.stepIndex = ((i % n) + n) % n;
+      } else {
+        timer.stepIndex = clamp(i, 0, routine.steps.length-1);
       }
-      if (timer.phase === "prep"){
-        timer.phase = "rest";
-        timer.cycle = 1; // now we're in cycle 1
-        const r = getRestForCycle(0);
-        return { kind:"rest", name:"Breathe normally", durSec: r };
-      }
-      if (timer.phase === "rest"){
-        timer.phase = "hold";
-        const h = getHoldForCycle(cycleIndex0);
-        return { kind:"hold", name: cueTextForHold(), durSec: h };
-      }
-      if (timer.phase === "hold"){
-        timer.phase = "rest";
-        timer.cycle += 1;
-        const r = getRestForCycle(timer.cycle - 1); // because cycle increments first
-        return { kind:"rest", name:"Breathe normally", durSec: r };
-      }
-      return null;
+      const st = currentStep();
+      timer.remaining = st ? st.sec : 0;
+      syncUI();
     }
 
-    function updateUI(){
-      $("cycle").textContent = String(timer.cycle);
-      $("elapsed").textContent = fmtMMSS(timer.elapsedSec);
-      $("totalLeft").textContent = fmtMMSS(Math.max(0, timer.totalTargetSec - timer.elapsedSec));
-      $("phaseTime").textContent = fmtMMSS(timer.phaseRemainingSec);
-
-      $("phaseLabel").textContent =
-        (timer.phase === "hold") ? cueTextForHold() :
-        (timer.phase === "rest") ? "Breathe normally" :
-        (timer.phase === "prep") ? "Get ready" :
-        (timer.phase === "done") ? "Done" : "Ready";
-
-      setModeUI();
-      updateCurrentDurationsUI();
+    function stepSummary(){
+      const st = currentStep();
+      if (!st) return "No steps";
+      return `${st.type.toUpperCase()} • ${st.label} • ${st.sec}s`;
     }
 
-    function startSession(){
+    function onStepChange(reason){
+      addLog(reason, stepSummary());
+      beep("phase");
+      vibrate(70);
+    }
+
+    function start(){
       if (timer.running) return;
+      if (!routine.steps.length) routine.steps = defaultRoutine().steps;
 
-      // schedule is based on CURRENT stored settings (single) unless JSON imported (array)
-      const base = getSettings();
-      timer.schedule = buildScheduleFromObject(base); // starts in single mode by default
+      // bind routine loop/total to settings (you can override via JSON import too)
+      routine.loop = settings.loop;
+      routine.totalMin = settings.totalMin;
 
-      // If user pasted JSON in box and forgot to hit "Load", don't auto-load (too risky)
-      // They must press Load JSON to enable arrays.
-
-      if (base.soundOn) ensureAudio();
+      if (settings.soundOn) ensureAudio();
 
       timer.running = true;
       timer.paused = false;
-      timer.phase = "ready";
-      timer.cycle = 0;
-      timer.elapsedSec = 0;
-      timer.totalTargetSec = base.totalMin * 60;
+      timer.stepIndex = clamp(timer.stepIndex, 0, routine.steps.length-1);
+      timer.elapsed = 0;
+      timer.totalTarget = settings.loop ? (settings.totalMin * 60) : 0;
 
-      timer.phasePlan = nextPhasePlan();
-      timer.phaseRemainingSec = timer.phasePlan?.durSec ?? 0;
+      const st = currentStep();
+      timer.remaining = st ? st.sec : 0;
 
-      timer.lastTickMs = nowMs();
-      timer.accumMs = 0;
+      timer.lastTick = performance.now();
+      timer.accMs = 0;
 
       $("startBtn").disabled = true;
       $("pauseBtn").disabled = false;
       $("resumeBtn").disabled = true;
       $("stopBtn").disabled = false;
+      $("prevBtn").disabled = false;
+      $("nextBtn").disabled = false;
+      $("restartStepBtn").disabled = false;
 
       setStatus("Running");
-      addLog("Started", `${timer.schedule.mode === "array" ? "Array" : "Single"} mode • Total ${base.totalMin}m`);
+      addLog("Started", `${settings.loop ? "Loop" : "Run once"} • ${settings.loop ? `Total ${settings.totalMin}m` : "Stops at end"}`);
       beep("start");
       vibrate(60);
 
-      updateUI();
-      tickLoop();
+      syncUI();
+      tick();
     }
 
-    function pauseSession(){
+    function pause(){
       if (!timer.running || timer.paused) return;
       timer.paused = true;
       setStatus("Paused");
       $("pauseBtn").disabled = true;
       $("resumeBtn").disabled = false;
-      addLog("Paused", "");
+      addLog("Paused");
       vibrate(40);
-      updateUI();
+      syncUI();
     }
 
-    function resumeSession(){
+    function resume(){
       if (!timer.running || !timer.paused) return;
-      if ($("soundOn").checked) ensureAudio();
+      if (settings.soundOn) ensureAudio();
       timer.paused = false;
-      timer.lastTickMs = nowMs();
-      timer.accumMs = 0;
+      timer.lastTick = performance.now();
+      timer.accMs = 0;
       setStatus("Running");
       $("pauseBtn").disabled = false;
       $("resumeBtn").disabled = true;
-      addLog("Resumed", "");
+      addLog("Resumed");
       vibrate(40);
-      tickLoop();
+      tick();
     }
 
-    function stopSession(manual=true){
+    function stop(manual=true){
       if (!timer.running) return;
       timer.running = false;
       timer.paused = false;
-      timer.phase = "done";
-      timer.phaseRemainingSec = 0;
-      setStatus("Stopped");
 
       $("startBtn").disabled = false;
       $("pauseBtn").disabled = true;
       $("resumeBtn").disabled = true;
       $("stopBtn").disabled = true;
+      $("prevBtn").disabled = true;
+      $("nextBtn").disabled = true;
+      $("restartStepBtn").disabled = true;
 
+      setStatus("Stopped");
       if (manual){
-        addLog("Stopped", `Elapsed ${fmtMMSS(timer.elapsedSec)}`);
+        addLog("Stopped", `Elapsed ${fmtMMSS(timer.elapsed)}`);
+        beep("end");
         vibrate(120);
       }
-      updateUI();
+      syncUI();
     }
 
-    function advancePhase(){
-      timer.phasePlan = nextPhasePlan();
-      if (!timer.phasePlan){
-        stopSession(false);
+    function nextStep(){
+      if (!timer.running) return;
+      setStepIndex(timer.stepIndex + 1);
+      onStepChange("Next");
+    }
+
+    function prevStep(){
+      if (!timer.running) return;
+      setStepIndex(timer.stepIndex - 1);
+      onStepChange("Prev");
+    }
+
+    function restartStep(){
+      if (!timer.running) return;
+      const st = currentStep();
+      timer.remaining = st ? st.sec : 0;
+      onStepChange("Restart step");
+      syncUI();
+    }
+
+    function advanceAuto(){
+      // move to next; if run-once and we’re at end, stop.
+      const atEnd = (timer.stepIndex === routine.steps.length - 1);
+      if (!settings.loop && atEnd){
+        stop(false);
+        setStatus("Done");
+        addLog("Completed", `Run-once finished • Elapsed ${fmtMMSS(timer.elapsed)}`);
+        beep("end");
+        vibrate(150);
         return;
       }
-      timer.phaseRemainingSec = timer.phasePlan.durSec;
-
-      // log with per-cycle values when entering a hold/rest
-      if (timer.phasePlan.kind === "rest" || timer.phasePlan.kind === "hold"){
-        const idx0 = Math.max(timer.cycle - 1, 0);
-        const h = getHoldForCycle(idx0);
-        const r = getRestForCycle(idx0);
-        const detail = `Cycle ${timer.cycle} • Hold ${h}s • Rest ${r}s`;
-        addLog("Phase", `${timer.phasePlan.kind.toUpperCase()} • ${detail}`);
-      } else {
-        addLog("Phase", timer.phasePlan.name);
-      }
-
-      beep("phase");
-      vibrate(70);
-      updateUI();
+      setStepIndex(timer.stepIndex + 1);
+      onStepChange("Auto-advance");
     }
 
-    function tickLoop(){
+    function tick(){
       if (!timer.running || timer.paused) return;
 
-      const ms = nowMs();
-      const dt = ms - timer.lastTickMs;
-      timer.lastTickMs = ms;
-      timer.accumMs += dt;
+      const now = performance.now();
+      timer.accMs += (now - timer.lastTick);
+      timer.lastTick = now;
 
-      while (timer.accumMs >= 1000){
-        timer.accumMs -= 1000;
+      while (timer.accMs >= 1000){
+        timer.accMs -= 1000;
 
-        timer.elapsedSec += 1;
-        timer.phaseRemainingSec -= 1;
+        timer.elapsed += 1;
+        timer.remaining -= 1;
 
-        if (timer.elapsedSec >= timer.totalTargetSec){
+        // total cap (loop mode)
+        if (settings.loop && timer.elapsed >= timer.totalTarget){
           timer.running = false;
-          timer.phase = "done";
-          timer.phaseRemainingSec = 0;
+          timer.paused = false;
 
           $("startBtn").disabled = false;
           $("pauseBtn").disabled = true;
           $("resumeBtn").disabled = true;
           $("stopBtn").disabled = true;
+          $("prevBtn").disabled = true;
+          $("nextBtn").disabled = true;
+          $("restartStepBtn").disabled = true;
 
           setStatus("Done");
-          addLog("Completed", `Total ${fmtMMSS(timer.totalTargetSec)}`);
+          addLog("Completed", `Total ${fmtMMSS(timer.totalTarget)}`);
+          beep("end");
           vibrate(150);
-          updateUI();
+          syncUI();
           return;
         }
 
-        if (timer.phaseRemainingSec <= 0){
-          advancePhase();
-        } else {
-          updateUI();
+        if (timer.remaining <= 0){
+          advanceAuto();
         }
       }
 
-      requestAnimationFrame(tickLoop);
+      syncUI();
+      requestAnimationFrame(tick);
     }
 
-    /***********************
-     * Settings JSON import/export (now supports arrays)
-     ***********************/
-    function settingsToJson(){
-      // export current sliders + toggles (single mode),
-      // AND if schedule is array mode (because user imported), export arrays too.
-      // We'll store imported arrays in timer.schedule ONLY during a session,
-      // so exporting arrays is handled by the json box after load.
-      const s = getSettings();
-      return JSON.stringify(s, null, 2);
+    /***************
+     * UI sync
+     ***************/
+    function syncUI(){
+      // settings UI
+      $("loopMode").checked = settings.loop;
+      $("totalMin").value = String(settings.totalMin);
+      $("totalVal").textContent = fmtMSS(settings.totalMin * 60);
+      $("soundOn").checked = settings.soundOn;
+      $("vibeOn").checked = settings.vibeOn;
+      $("volume").value = String(settings.volume);
+      $("soundState").textContent = settings.soundOn ? "On" : "Off";
+      $("vibeState").textContent = settings.vibeOn ? "On" : "Off";
+      $("mode").textContent = settings.loop ? "Loop" : "Run once";
+
+      // timer UI
+      const st = currentStep();
+      $("stepLabel").textContent = st ? st.label : "Ready";
+      $("timeLeft").textContent = fmtMMSS(timer.running ? timer.remaining : 0);
+
+      const totalLeft = settings.loop ? Math.max(0, timer.totalTarget - timer.elapsed) : 0;
+      $("totalLeft").textContent = settings.loop ? fmtMMSS(totalLeft) : "--:--";
+      $("elapsed").textContent = fmtMMSS(timer.elapsed);
+
+      const n = routine.steps.length;
+      const stepPos = timer.running ? (timer.stepIndex + 1) : 0;
+      $("stepNum").textContent = `${stepPos}/${n}`;
+
+      $("volVal").textContent = `${settings.volume}%`;
+
+      // JSON box can show current routine if user wants
+      // (we don’t overwrite while they’re typing unless they hit Export)
     }
 
-    function applyLoadedObjectToUI(obj){
-      // Apply toggles and totalMin if present
-      if (obj.totalMin != null) $("totalMin").value = clamp(Number(obj.totalMin), 3, 20);
-      if (obj.holdOnInhale != null) $("holdOnInhale").checked = !!obj.holdOnInhale;
-      if (obj.soundOn != null) $("soundOn").checked = !!obj.soundOn;
-      if (obj.vibeOn != null) $("vibeOn").checked = !!obj.vibeOn;
-      if (obj.volume != null) $("volume").value = clamp(Number(obj.volume), 0, 100);
-
-      // If holdSec/restSec are numbers, apply to sliders
-      if (!Array.isArray(obj.holdSec) && obj.holdSec != null && Number.isFinite(Number(obj.holdSec))){
-        $("holdSec").value = clamp(Number(obj.holdSec), 10, 120);
-      }
-      if (!Array.isArray(obj.restSec) && obj.restSec != null && Number.isFinite(Number(obj.restSec))){
-        $("restSec").value = clamp(Number(obj.restSec), 5, 90);
-      }
-
-      syncSettingLabels();
-      applyVolume();
+    /***************
+     * Import/export routine JSON
+     ***************/
+    function exportRoutine(){
+      const obj = {
+        name: routine.name || "Routine",
+        loop: settings.loop,
+        totalMin: settings.totalMin,
+        steps: routine.steps.map(s => ({ label:s.label, sec:s.sec, type:s.type }))
+      };
+      $("jsonBox").value = JSON.stringify(obj, null, 2);
+      addLog("Exported JSON", "Routine copied into the box");
     }
 
-    function loadJsonIntoSettings(){
+    function importRoutine(){
       const raw = $("jsonBox").value.trim();
       if (!raw) return;
-
       try{
         const obj = JSON.parse(raw);
+        const sanitized = sanitizeRoutine(obj);
 
-        // Save "base" settings for toggles + slider numbers (so they persist)
-        applyLoadedObjectToUI(obj);
-        saveSettings();
+        // apply routine + also apply loop/total if present
+        routine = sanitized;
 
-        // Store array-mode presets in localStorage so the NEXT start can use them too.
-        // We'll use a separate key so it doesn't break old saves.
-        localStorage.setItem("co2_timer_arrays_v1", JSON.stringify({
-          holdSec: Array.isArray(obj.holdSec) ? obj.holdSec : null,
-          restSec: Array.isArray(obj.restSec) ? obj.restSec : null
-        }));
+        // if JSON includes loop/totalMin, use them as settings too
+        if (obj.loop !== undefined) settings.loop = !!obj.loop;
+        if (obj.totalMin !== undefined) settings.totalMin = clamp(+obj.totalMin || 8, 3, 300);
 
-        addLog("Settings loaded", `JSON (${(Array.isArray(obj.holdSec)||Array.isArray(obj.restSec)) ? "array" : "single"} mode)`);
-        markSaved(true);
-        updateUI();
+        // keep timer safe
+        if (timer.stepIndex >= routine.steps.length) timer.stepIndex = 0;
+        if (!timer.running){
+          timer.remaining = routine.steps[0].sec;
+        }
+
+        renderSteps();
+        saveAll();
+        addLog("Imported JSON", `${routine.steps.length} steps`);
       }catch(e){
-        addLog("JSON error", "Could not parse settings JSON");
-        alert("Could not parse JSON. Make sure it's a valid JSON object.");
+        alert("Invalid JSON. Make sure it’s a valid routine object with a steps array.");
       }
     }
 
-    function loadArrayOverrides(){
-      try{
-        const raw = localStorage.getItem("co2_timer_arrays_v1");
-        if (!raw) return null;
-        const obj = JSON.parse(raw);
-        const holdArr = Array.isArray(obj.holdSec) ? obj.holdSec : null;
-        const restArr = Array.isArray(obj.restSec) ? obj.restSec : null;
-        if (!holdArr && !restArr) return null;
-        return { holdSec: holdArr, restSec: restArr };
-      }catch(e){
-        return null;
-      }
-    }
-
-    async function copyText(text){
-      try{ await navigator.clipboard.writeText(text); return true; }
-      catch(e){ return false; }
-    }
-
-    /***********************
-     * Tendon routine
-     ***********************/
-    const TENDON_KEY = "tendon_routine_v1";
-    let tendon = [];
-
-    function defaultTendon(){
-      return [
-        { name: "Doorway pec stretch", note: "60–90s", done: false },
-        { name: "Straight-arm hang", note: "30–60s", done: false },
-        { name: "Shoulder external rotation (band)", note: "2 x 12–20 slow", done: false },
-        { name: "Wrist extensor isometrics", note: "4 x 30–45s each side", done: false },
-        { name: "Calf isometrics", note: "4 x 30–45s", done: false }
-      ];
-    }
-    function saveTendon(){ localStorage.setItem(TENDON_KEY, JSON.stringify(tendon)); }
-    function loadTendon(){
-      try{
-        const raw = localStorage.getItem(TENDON_KEY);
-        tendon = raw ? JSON.parse(raw) : defaultTendon();
-      }catch(e){ tendon = defaultTendon(); }
-      renderTendon();
-    }
-
-    function renderTendon(){
-      const list = $("tendonList");
-      list.innerHTML = "";
-      tendon.forEach((it, idx) => {
-        const row = document.createElement("div");
-        row.className = "item";
-
-        const left = document.createElement("div");
-        const top = document.createElement("div");
-        top.className = "name";
-        top.style.display = "flex";
-        top.style.alignItems = "center";
-        top.style.gap = "10px";
-
-        const cb = document.createElement("input");
-        cb.type = "checkbox";
-        cb.checked = !!it.done;
-        cb.addEventListener("change", () => { it.done = cb.checked; saveTendon(); });
-
-        const nameInput = document.createElement("input");
-        nameInput.type = "text";
-        nameInput.value = it.name || "";
-        nameInput.style.width = "100%";
-        nameInput.style.padding = "10px 10px";
-        nameInput.style.borderRadius = "12px";
-        nameInput.style.border = "1px solid rgba(255,255,255,.12)";
-        nameInput.style.background = "rgba(0,0,0,.18)";
-        nameInput.style.color = "var(--text)";
-        nameInput.style.fontWeight = "800";
-        nameInput.addEventListener("input", () => { it.name = nameInput.value; saveTendon(); });
-
-        top.appendChild(cb);
-        top.appendChild(nameInput);
-
-        const noteInput = document.createElement("input");
-        noteInput.type = "text";
-        noteInput.value = it.note || "";
-        noteInput.placeholder = "notes (sets/reps/time)";
-        noteInput.style.marginTop = "8px";
-        noteInput.style.width = "100%";
-        noteInput.style.padding = "10px 10px";
-        noteInput.style.borderRadius = "12px";
-        noteInput.style.border = "1px solid rgba(255,255,255,.12)";
-        noteInput.style.background = "rgba(0,0,0,.18)";
-        noteInput.style.color = "var(--text)";
-        noteInput.style.fontWeight = "700";
-        noteInput.addEventListener("input", () => { it.note = noteInput.value; saveTendon(); });
-
-        left.appendChild(top);
-        left.appendChild(noteInput);
-
-        const right = document.createElement("div");
-        right.className = "rt";
-        right.style.display = "flex";
-        right.style.flexDirection = "column";
-        right.style.gap = "8px";
-        right.style.alignItems = "flex-end";
-
-        const del = document.createElement("button");
-        del.className = "tinybtn danger";
-        del.textContent = "Delete";
-        del.addEventListener("click", () => {
-          tendon.splice(idx,1);
-          saveTendon();
-          renderTendon();
-        });
-
-        right.appendChild(del);
-        row.appendChild(left);
-        row.appendChild(right);
-        list.appendChild(row);
-      });
-
-      $("tendonJson").value = JSON.stringify(tendon, null, 2);
-    }
-
-    function tendonLoadFromJson(){
-      const raw = $("tendonJson").value.trim();
-      if (!raw) return;
-      try{
-        const obj = JSON.parse(raw);
-        if (!Array.isArray(obj)) throw new Error("Not an array");
-        tendon = obj.map(x => ({ name: String(x.name ?? ""), note: String(x.note ?? ""), done: !!x.done }));
-        saveTendon();
-        renderTendon();
-      }catch(e){
-        alert("Could not parse routine JSON. It must be a JSON array.");
-      }
-    }
-
-    /***********************
-     * Tabs
-     ***********************/
-    function showTab(which){
-      const isTimer = which === "timer";
-      $("view-timer").classList.toggle("hidden", !isTimer);
-      $("view-tendon").classList.toggle("hidden", isTimer);
-
-      $("tab-timer").classList.toggle("active", isTimer);
-      $("tab-tendon").classList.toggle("active", !isTimer);
-      $("tab-timer").setAttribute("aria-selected", isTimer ? "true" : "false");
-      $("tab-tendon").setAttribute("aria-selected", !isTimer ? "true" : "false");
-    }
-
-    /***********************
-     * Wire up
-     ***********************/
+    /***************
+     * Wire controls
+     ***************/
     function wire(){
-      $("tab-timer").addEventListener("click", () => showTab("timer"));
-      $("tab-tendon").addEventListener("click", () => showTab("tendon"));
-
-      ["holdSec","restSec","totalMin","holdOnInhale","soundOn","vibeOn","volume"].forEach(id => {
-        $(id).addEventListener("input", () => {
-          syncSettingLabels();
-          applyVolume();
-          markSaved(false);
-          saveSettings();
-          updateUI();
-        });
-        $(id).addEventListener("change", () => {
-          syncSettingLabels();
-          applyVolume();
-          markSaved(false);
-          saveSettings();
-          updateUI();
-        });
+      // settings
+      $("loopMode").addEventListener("change", () => {
+        settings.loop = $("loopMode").checked;
+        markSaved(false);
+        saveAll();
+      });
+      $("totalMin").addEventListener("input", () => {
+        settings.totalMin = clamp(+$("totalMin").value, 3, 30);
+        markSaved(false);
+        saveAll();
+      });
+      $("soundOn").addEventListener("change", () => {
+        settings.soundOn = $("soundOn").checked;
+        markSaved(false);
+        saveAll();
+      });
+      $("vibeOn").addEventListener("change", () => {
+        settings.vibeOn = $("vibeOn").checked;
+        markSaved(false);
+        saveAll();
+      });
+      $("volume").addEventListener("input", () => {
+        settings.volume = clamp(+$("volume").value, 0, 100);
+        applyVolume();
+        markSaved(false);
+        saveAll();
       });
 
-      $("startBtn").addEventListener("click", () => {
-        // If user previously imported arrays, apply them to schedule automatically at start.
-        // (This is the feature you want.)
-        const base = getSettings();
-        const overrides = loadArrayOverrides();
-        const merged = { ...base, ...(overrides || {}) };
-        timer.schedule = buildScheduleFromObject(merged);
+      // timer buttons
+      $("startBtn").addEventListener("click", start);
+      $("pauseBtn").addEventListener("click", pause);
+      $("resumeBtn").addEventListener("click", resume);
+      $("stopBtn").addEventListener("click", () => stop(true));
+      $("nextBtn").addEventListener("click", nextStep);
+      $("prevBtn").addEventListener("click", prevStep);
+      $("restartStepBtn").addEventListener("click", restartStep);
 
-        startSessionAfterScheduleSet(base.totalMin);
+      // editor actions
+      $("addStepBtn").addEventListener("click", () => {
+        routine.steps.push({ label:"New step", sec:30, type:"custom" });
+        renderSteps();
+        markSaved(false);
+        saveAll();
       });
 
-      function startSessionAfterScheduleSet(totalMin){
+      $("addHoldRestBtn").addEventListener("click", () => {
+        routine.steps.push({ label:"Breathe", sec:60, type:"rest" });
+        routine.steps.push({ label:"Hold", sec:45, type:"hold" });
+        renderSteps();
+        markSaved(false);
+        saveAll();
+      });
+
+      // json
+      $("exportBtn").addEventListener("click", exportRoutine);
+      $("importBtn").addEventListener("click", importRoutine);
+
+      $("resetBtn").addEventListener("click", () => {
         if (timer.running) return;
-        const base = getSettings();
-
-        if (base.soundOn) ensureAudio();
-
-        timer.running = true;
-        timer.paused = false;
-        timer.phase = "ready";
-        timer.cycle = 0;
-        timer.elapsedSec = 0;
-        timer.totalTargetSec = totalMin * 60;
-
-        timer.phasePlan = nextPhasePlan();
-        timer.phaseRemainingSec = timer.phasePlan?.durSec ?? 0;
-
-        timer.lastTickMs = nowMs();
-        timer.accumMs = 0;
-
-        $("startBtn").disabled = true;
-        $("pauseBtn").disabled = false;
-        $("resumeBtn").disabled = true;
-        $("stopBtn").disabled = false;
-
-        setStatus("Running");
-        addLog("Started", `${timer.schedule.mode === "array" ? "Array" : "Single"} mode • Total ${totalMin}m`);
-        vibrate(60);
-        updateUI();
-        tickLoop();
-      }
-
-      $("pauseBtn").addEventListener("click", pauseSession);
-      $("resumeBtn").addEventListener("click", resumeSession);
-      $("stopBtn").addEventListener("click", () => stopSession(true));
-
-      $("resetSettingsBtn").addEventListener("click", () => {
-        if (timer.running) return;
-        setSettings(DEFAULTS);
-        localStorage.removeItem("co2_timer_arrays_v1");
-        saveSettings();
-        addLog("Settings reset", "Cleared array presets too");
-        updateUI();
+        routine = defaultRoutine();
+        settings.loop = true;
+        settings.totalMin = 8;
+        settings.soundOn = false;
+        settings.vibeOn = true;
+        settings.volume = 70;
+        timer.stepIndex = 0;
+        timer.remaining = routine.steps[0].sec;
+        $("jsonBox").value = "";
+        renderSteps();
+        saveAll();
+        addLog("Reset", "Defaults restored");
       });
 
-      $("copySettingsBtn").addEventListener("click", async () => {
-        const base = getSettings();
-        const overrides = loadArrayOverrides();
-        const obj = { ...base };
-        if (overrides?.holdSec) obj.holdSec = overrides.holdSec;
-        if (overrides?.restSec) obj.restSec = overrides.restSec;
-
-        const text = JSON.stringify(obj, null, 2);
-        $("jsonBox").value = text;
-
-        const ok = await copyText(text);
-        addLog("Settings copied", ok ? "Copied to clipboard" : "Copied to box (clipboard blocked)");
-        if (!ok) alert("Copied into the box, but clipboard was blocked by the browser.");
-      });
-
-      $("loadSettingsBtn").addEventListener("click", loadJsonIntoSettings);
-
-      $("tendonAdd").addEventListener("click", () => {
-        tendon.unshift({ name: "New item", note: "", done: false });
-        saveTendon();
-        renderTendon();
-      });
-      $("tendonClear").addEventListener("click", () => { tendon = []; saveTendon(); renderTendon(); });
-      $("tendonCopy").addEventListener("click", async () => {
-        $("tendonJson").value = JSON.stringify(tendon, null, 2);
-        const ok = await copyText($("tendonJson").value);
-        if (!ok) alert("Clipboard blocked. JSON is in the box—copy it manually.");
-      });
-      $("tendonLoad").addEventListener("click", tendonLoadFromJson);
-
-      // spacebar controls
+      // keyboard shortcuts
       window.addEventListener("keydown", (e) => {
-        if (e.key === " "){
-          const tag = (document.activeElement?.tagName || "").toLowerCase();
-          if (tag !== "input" && tag !== "textarea"){
-            e.preventDefault();
-            if (!timer.running) $("startBtn").click();
-            else if (timer.running && !timer.paused) pauseSession();
-            else if (timer.running && timer.paused) resumeSession();
-          }
+        const tag = (document.activeElement?.tagName || "").toLowerCase();
+        const inField = (tag === "input" || tag === "textarea" || tag === "select");
+
+        if (e.key === " " && !inField){
+          e.preventDefault();
+          if (!timer.running) start();
+          else if (timer.running && !timer.paused) pause();
+          else if (timer.running && timer.paused) resume();
         }
-        if (e.key.toLowerCase() === "s"){
-          if (timer.running) stopSession(true);
-        }
+
+        if (!inField && (e.key === "n" || e.key === "N")){ if (timer.running) nextStep(); }
+        if (!inField && (e.key === "p" || e.key === "P")){ if (timer.running) prevStep(); }
+        if (!inField && (e.key === "s" || e.key === "S")){ if (timer.running) stop(true); }
       });
     }
 
-    /***********************
+    /***************
      * Init
-     ***********************/
+     ***************/
     (function init(){
-      loadSettings();
+      loadAll();
+
+      // reflect loaded settings into routine defaults (but keep routine steps)
+      routine.loop = settings.loop;
+      routine.totalMin = settings.totalMin;
+
+      // initialize timer view
+      timer.stepIndex = 0;
+      timer.remaining = routine.steps[0]?.sec || 0;
+
+      // paint UI
+      renderSteps();
       loadLog();
-      loadTendon();
-      syncSettingLabels();
-      applyVolume();
+      syncUI();
+
+      // initial button states
+      $("pauseBtn").disabled = true;
+      $("resumeBtn").disabled = true;
+      $("stopBtn").disabled = true;
+      $("prevBtn").disabled = true;
+      $("nextBtn").disabled = true;
+      $("restartStepBtn").disabled = true;
+
+      // status
       setStatus("Stopped");
+      addLog("Ready", "Edit steps, then Start. Use Prev/Next anytime.");
 
-      // show array vs single mode based on stored array presets
-      const base = getSettings();
-      const overrides = loadArrayOverrides();
-      const merged = { ...base, ...(overrides || {}) };
-      timer.schedule = buildScheduleFromObject(merged);
-
-      updateUI();
       wire();
-      addLog("Ready", `Mode: ${timer.schedule.mode === "array" ? "Array (from JSON import)" : "Single (sliders)"}`);
+      saveAll();
     })();
   </script>
 </body>
