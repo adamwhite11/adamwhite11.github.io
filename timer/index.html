@@ -3,17 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Timer</title>
+  <title>Adam Timer</title>
   <style>
     :root{
       --bg:#0b1220;
       --card:rgba(255,255,255,.06);
-      --muted:rgba(255,255,255,.65);
+      --muted:rgba(255,255,255,.68);
       --text:#f3f7ff;
       --accent:#7ee7c6;
       --accent2:#6aa8ff;
       --danger:#ff6b7a;
-      --border:rgba(255,255,255,.10);
+      --border:rgba(255,255,255,.12);
       --shadow:0 10px 30px rgba(0,0,0,.35);
       --r:16px;
     }
@@ -27,46 +27,40 @@
       color:var(--text);
       padding:18px;
     }
-    .wrap{max-width:1050px;margin:0 auto;display:grid;grid-template-columns:420px 1fr;gap:16px;align-items:start}
+    .wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:420px 1fr;gap:16px;align-items:start}
     .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
     h1{margin:0 0 6px 0;font-size:18px}
     .muted{color:var(--muted);font-size:13px;line-height:1.35}
     .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     .space{height:12px}
-    .time{font-size:72px;font-weight:800;letter-spacing:-2px;line-height:1}
-    .pill{display:inline-block;padding:7px 10px;border-radius:999px;
-      background:linear-gradient(90deg,var(--accent),var(--accent2));
-      color:#06222a;font-weight:800;font-size:12px}
+    .time{font-size:72px;font-weight:900;letter-spacing:-2px;line-height:1}
+    .pill{display:inline-block;padding:7px 10px;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#06222a;font-weight:900;font-size:12px}
     button{
       border:0;border-radius:12px;padding:10px 14px;
       background:rgba(255,255,255,.10);color:var(--text);
-      font-weight:700;cursor:pointer
+      font-weight:800;cursor:pointer
     }
-    button.primary{
-      background:linear-gradient(90deg,var(--accent),var(--accent2));
-      color:#06222a
-    }
+    button.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#06222a}
     button.danger{background:linear-gradient(90deg,var(--danger),#ff9aa6);color:#2a0206}
     button:active{transform:translateY(1px)}
     input,select{
       background:rgba(0,0,0,.18);
-      border:1px solid rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.14);
       color:var(--text);
       border-radius:12px;
       padding:10px 12px;
-      font-weight:700;
+      font-weight:800;
       outline:none;
     }
-    input[type="number"]{width:96px;text-align:center}
+    input[type="number"]{width:98px;text-align:center}
     .small{font-size:12px;color:var(--muted)}
     .list{display:flex;flex-direction:column;gap:8px;max-height:430px;overflow:auto;padding-right:6px}
     .item{display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.10);border-radius:14px;padding:10px}
     .item input[type="text"]{flex:1;min-width:150px;background:transparent;border:0;padding:0}
     .item .mini{width:86px}
-    .item .btnmini{padding:8px 10px;border-radius:10px;font-weight:900}
-    .hr{height:1px;background:rgba(255,255,255,.10);margin:14px 0}
-    .toggle{display:flex;gap:10px;align-items:center}
+    .btnmini{padding:8px 10px;border-radius:10px;font-weight:900}
+    .hr{height:1px;background:rgba(255,255,255,.12);margin:14px 0}
     .toggle label{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
     .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted)}
     @media (max-width:950px){.wrap{grid-template-columns:1fr}}
@@ -79,7 +73,7 @@
       <div class="row" style="justify-content:space-between">
         <div>
           <h1>Timer</h1>
-          <div class="muted">Runs your interval list in order, for the number of rounds you choose.</div>
+          <div class="muted">Simple interval timer + CO₂ builder. Sound is unlocked when you press Start or Test sound.</div>
         </div>
         <span class="pill" id="statusPill">READY</span>
       </div>
@@ -94,6 +88,7 @@
       <div class="row">
         <button class="primary" id="startPauseBtn">Start</button>
         <button id="nextBtn">Next</button>
+        <button id="testSoundBtn">Test sound</button>
         <button class="danger" id="resetBtn">Reset</button>
       </div>
 
@@ -123,24 +118,23 @@
       <div class="hr"></div>
 
       <div class="row">
-        <button id="saveBtn">Save workout</button>
+        <button id="saveBtn">Save</button>
         <button id="exportBtn">Export JSON</button>
         <button id="importBtn">Import JSON</button>
         <input id="fileInput" type="file" accept=".json,application/json" style="display:none;">
       </div>
 
       <div class="space"></div>
-
       <div class="small">Saved workouts</div>
       <div class="list" id="savedList"></div>
     </div>
 
-    <!-- EDITOR -->
+    <!-- BUILDER + EDITOR -->
     <div class="card">
       <div class="row" style="justify-content:space-between">
         <div>
           <h1>Intervals</h1>
-          <div class="muted">Name + seconds. For holds, use wording like: <b>hold on inhale</b>.</div>
+          <div class="muted">Edit list directly, or generate with CO₂ builder.</div>
         </div>
         <div class="kbd">/timer/</div>
       </div>
@@ -191,10 +185,7 @@
       <div class="list" id="intervalList"></div>
 
       <div class="hr"></div>
-      <div class="muted">
-        CO₂ builder ramps hold time from min → max and fills the session to your total duration target.
-        Last recovery may be shortened to fit.
-      </div>
+      <div class="muted">CO₂ builder ramps hold time from min → max and fills to your target duration. Last recovery may be shortened.</div>
     </div>
   </div>
 
@@ -208,6 +199,7 @@
   const startPauseBtn = document.getElementById("startPauseBtn");
   const nextBtn = document.getElementById("nextBtn");
   const resetBtn = document.getElementById("resetBtn");
+  const testSoundBtn = document.getElementById("testSoundBtn");
 
   const roundsEl = document.getElementById("rounds");
   const autoAdvanceEl = document.getElementById("autoAdvance");
@@ -242,8 +234,8 @@
   let running = false;
   let timerId = null;
 
-  const LS_SAVED = "adam.timer.saved.v2";
-  const LS_EDITOR = "adam.timer.editor.v2";
+  const LS_SAVED = "adam.timer.saved.v3";
+  const LS_EDITOR = "adam.timer.editor.v3";
 
   // Utils
   const pad2 = (n) => String(n).padStart(2,"0");
@@ -258,31 +250,44 @@
     if (Number.isNaN(n)) n = lo;
     return Math.max(lo, Math.min(hi, n));
   };
+  const escapeHtml = (s) => String(s)
+    .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
 
-  function setStatus(text){ statusPill.textContent = text; }
+  function setStatus(t){ statusPill.textContent = t; }
   function getRounds(){ return Math.max(1, parseInt(roundsEl.value || "1", 10)); }
-
   function setLabel(){
     if (!intervals.length){ currentLabel.textContent = "—"; return; }
     const it = intervals[currentIndex];
     currentLabel.textContent = `Round ${currentRound}/${getRounds()} • ${it.name} • ${it.sec}s`;
   }
 
-  function beep(freq=880, ms=120){
+  // Audio (iOS-safe): single context, unlocked by button tap
+  let audioCtx = null;
+  function ensureAudio(){
+    if (!soundOnEl.checked) return null;
+    if (!audioCtx){
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === "suspended"){
+      audioCtx.resume().catch(()=>{});
+    }
+    return audioCtx;
+  }
+  function beep(freq=880, ms=140){
     if (!soundOnEl.checked) return;
+    const ctx = ensureAudio();
+    if (!ctx) return;
     try{
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
       const o = ctx.createOscillator();
       const g = ctx.createGain();
       o.type = "sine";
       o.frequency.value = freq;
-      g.gain.value = 0.06;
+      g.gain.value = 0.14; // loud enough
       o.connect(g); g.connect(ctx.destination);
       o.start();
-      setTimeout(() => { o.stop(); ctx.close(); }, ms);
+      setTimeout(()=>{ o.stop(); }, ms);
     }catch(e){}
   }
-
   function vibrate(ms=120){
     if (!vibrateOnEl.checked) return;
     if (navigator.vibrate) navigator.vibrate(ms);
@@ -292,7 +297,7 @@
     if (!running) return;
 
     const cb = Math.max(0, parseInt(countdownBeepsEl.value || "0", 10));
-    if (remaining <= cb && remaining > 0){ beep(880, 80); }
+    if (remaining <= cb && remaining > 0) beep(880, 80);
 
     remaining -= 1;
     timeDisplay.textContent = mmss(remaining);
@@ -312,6 +317,7 @@
 
   function start(){
     if (!intervals.length){ alert("Add at least one interval first."); return; }
+    ensureAudio(); // unlock audio from user gesture
     if (running) return;
 
     if (remaining <= 0){
@@ -322,7 +328,6 @@
     running = true;
     setStatus("RUNNING");
     startPauseBtn.textContent = "Pause";
-
     timerId = setInterval(tick, 1000);
     setLabel();
     timeDisplay.textContent = mmss(remaining);
@@ -353,7 +358,6 @@
       currentIndex = 0;
       currentRound += 1;
     }
-
     if (currentRound > getRounds()){
       pause();
       setStatus("DONE");
@@ -362,19 +366,9 @@
       setLabel();
       return;
     }
-
     remaining = intervals[currentIndex].sec;
     setLabel();
     timeDisplay.textContent = mmss(remaining);
-  }
-
-  // Editor
-  function escapeHtml(s){
-    return String(s)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;");
   }
 
   function renderIntervals(){
@@ -383,7 +377,7 @@
     if (!intervals.length){
       const div = document.createElement("div");
       div.className = "muted";
-      div.textContent = "No intervals yet. Click “Add interval”, “Build CO₂”, or load an example.";
+      div.textContent = "No intervals yet. Click “Build CO₂” or “Add interval”.";
       intervalListEl.appendChild(div);
       setLabel();
       timeDisplay.textContent = "00:00";
@@ -393,7 +387,6 @@
     intervals.forEach((it, idx) => {
       const row = document.createElement("div");
       row.className = "item";
-
       row.innerHTML = `
         <button class="btnmini" data-act="up" title="Move up">↑</button>
         <button class="btnmini" data-act="down" title="Move down">↓</button>
@@ -425,14 +418,12 @@
         resetAll();
         saveEditor();
       });
-
       row.querySelector('[data-act="up"]').addEventListener("click", () => {
         if (idx <= 0) return;
         [intervals[idx-1], intervals[idx]] = [intervals[idx], intervals[idx-1]];
         renderIntervals();
         saveEditor();
       });
-
       row.querySelector('[data-act="down"]').addEventListener("click", () => {
         if (idx >= intervals.length - 1) return;
         [intervals[idx+1], intervals[idx]] = [intervals[idx], intervals[idx+1]];
@@ -466,22 +457,18 @@
     saveEditor();
   }
 
-  // CO2 Builder
   function buildCO2Workout(){
-    // guardrails align with what you described (still allows wider ranges)
     const holdMin = clampInt(co2HoldMinEl.value, 10, 180);
     const holdMax = clampInt(co2HoldMaxEl.value, 10, 180);
     const totalMin = clampInt(co2TotalMinEl.value, 3, 20);
     const recoveryBase = clampInt(co2RecoveryEl.value, 10, 240);
     const warmup = clampInt(co2WarmupEl.value, 0, 300);
-    const holdType = co2HoldTypeEl.value === "exhale" ? "exhale" : "inhale";
+    const holdType = (co2HoldTypeEl.value === "exhale") ? "exhale" : "inhale";
 
     const minH = Math.min(holdMin, holdMax);
     const maxH = Math.max(holdMin, holdMax);
-
     const targetSec = totalMin * 60;
 
-    // start fresh
     const out = [];
     let elapsed = 0;
 
@@ -490,40 +477,31 @@
       elapsed += warmup;
     }
 
-    // choose number of cycles based on recovery and target time
-    // cycles roughly: hold + recovery
-    // we build progressively and truncate last recovery if needed.
-    const approxCycle = ((minH + maxH) / 2) + recoveryBase;
+    // Estimate cycles, then ramp holds linearly across cycles
+    const approxCycle = ((minH + maxH)/2) + recoveryBase;
     let cycles = Math.max(2, Math.floor((targetSec - elapsed) / approxCycle));
-    cycles = Math.min(cycles, 30); // sanity cap
+    cycles = Math.min(cycles, 40);
 
-    // if target is tiny, still make at least 2 cycles
-    if (cycles < 2) cycles = 2;
+    const holdLabel = holdType === "exhale"
+      ? "Exhale & hold — hold on exhale"
+      : "Inhale & hold — hold on inhale";
 
     for (let i=0; i<cycles; i++){
-      const t = cycles === 1 ? 0 : (i / (cycles - 1));
-      const holdSec = Math.round(minH + t * (maxH - minH));
+      const t = cycles === 1 ? 0 : (i/(cycles-1));
+      let holdSec = Math.round(minH + t*(maxH-minH));
 
-      const holdName = holdType === "exhale"
-        ? "Exhale & hold — hold on exhale"
-        : "Inhale & hold — hold on inhale";
-
-      // hold
       if (elapsed >= targetSec) break;
-      let holdToUse = holdSec;
-      if (elapsed + holdToUse > targetSec) holdToUse = Math.max(1, targetSec - elapsed);
-      out.push({ name: holdName, sec: holdToUse });
-      elapsed += holdToUse;
+      if (elapsed + holdSec > targetSec) holdSec = Math.max(1, targetSec - elapsed);
+      out.push({ name: holdLabel, sec: holdSec });
+      elapsed += holdSec;
 
-      // recovery
       if (elapsed >= targetSec) break;
-      let recToUse = recoveryBase;
-      if (elapsed + recToUse > targetSec) recToUse = Math.max(1, targetSec - elapsed);
-      out.push({ name: "Recovery breathe", sec: recToUse });
-      elapsed += recToUse;
+      let recSec = recoveryBase;
+      if (elapsed + recSec > targetSec) recSec = Math.max(1, targetSec - elapsed);
+      out.push({ name: "Recovery breathe", sec: recSec });
+      elapsed += recSec;
     }
 
-    // if we undershot a bit (common), add a small finish breathe to hit target closer
     if (elapsed < targetSec){
       out.push({ name: "Breathe normally", sec: targetSec - elapsed });
       elapsed = targetSec;
@@ -547,7 +525,7 @@
     saveEditor();
   }
 
-  // Save / load
+  // Saved workouts
   function loadSaved(){
     try{ return JSON.parse(localStorage.getItem(LS_SAVED) || "[]"); }
     catch(e){ return []; }
@@ -578,9 +556,7 @@
       el.querySelector('[data-act="load"]').addEventListener("click", () => {
         intervals = (w.intervals || []).map(x => ({ name: x.name, sec: Number(x.sec)||30 }));
         roundsEl.value = w.rounds || 1;
-        renderIntervals();
-        resetAll();
-        saveEditor();
+        renderIntervals(); resetAll(); saveEditor();
       });
       el.querySelector('[data-act="del"]').addEventListener("click", () => {
         if (!confirm("Delete saved workout?")) return;
@@ -595,13 +571,9 @@
 
   function saveEditor(){
     try{
-      localStorage.setItem(LS_EDITOR, JSON.stringify({
-        rounds: getRounds(),
-        intervals
-      }));
+      localStorage.setItem(LS_EDITOR, JSON.stringify({ rounds: getRounds(), intervals }));
     }catch(e){}
   }
-
   function loadEditor(){
     try{
       const s = JSON.parse(localStorage.getItem(LS_EDITOR) || "null");
@@ -614,6 +586,7 @@
     return false;
   }
 
+  // JSON import/export
   function exportJSON(){
     const payload = { name: "Workout", rounds: getRounds(), intervals };
     const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
@@ -626,7 +599,6 @@
     a.remove();
     URL.revokeObjectURL(url);
   }
-
   function importJSONFile(file){
     const reader = new FileReader();
     reader.onload = () => {
@@ -639,9 +611,7 @@
           sec: Number(x.sec ?? x.duration ?? x.durationSeconds ?? 30)
         }));
         roundsEl.value = obj.rounds || 1;
-        renderIntervals();
-        resetAll();
-        saveEditor();
+        renderIntervals(); resetAll(); saveEditor();
       }catch(e){
         alert("Import failed: " + e.message);
       }
@@ -652,14 +622,21 @@
   // Events
   startPauseBtn.addEventListener("click", () => running ? pause() : start());
   nextBtn.addEventListener("click", () => {
+    ensureAudio();
     if (!intervals.length) return;
     if (!running) setStatus("READY");
     nextInterval();
     if (!running) timeDisplay.textContent = mmss(remaining);
   });
   resetBtn.addEventListener("click", () => {
+    ensureAudio();
     if (!confirm("Reset timer?")) return;
     resetAll();
+  });
+  testSoundBtn.addEventListener("click", () => {
+    ensureAudio();
+    beep(880, 200);
+    setTimeout(()=>beep(660, 200), 240);
   });
 
   addRowBtn.addEventListener("click", () => addInterval());
@@ -694,11 +671,10 @@
   // Init
   const loaded = loadEditor();
   if (!loaded){
-    // default a short CO2 session
     buildCO2Workout();
+  } else {
+    renderIntervals(); resetAll();
   }
-  renderIntervals();
-  resetAll();
   renderSavedList();
 })();
 </script>
