@@ -1,682 +1,303 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Adam Timer</title>
-  <style>
-    :root{
-      --bg:#0b1220;
-      --card:rgba(255,255,255,.06);
-      --muted:rgba(255,255,255,.68);
-      --text:#f3f7ff;
-      --accent:#7ee7c6;
-      --accent2:#6aa8ff;
-      --danger:#ff6b7a;
-      --border:rgba(255,255,255,.12);
-      --shadow:0 10px 30px rgba(0,0,0,.35);
-      --r:16px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:-apple-system,system-ui,Segoe UI,Roboto,Arial;
-      background: radial-gradient(1200px 700px at 20% 0%, #12224a 0%, transparent 55%),
-                  radial-gradient(900px 600px at 90% 10%, #0f3b3c 0%, transparent 55%),
-                  var(--bg);
-      color:var(--text);
-      padding:18px;
-    }
-    .wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:420px 1fr;gap:16px;align-items:start}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
-    h1{margin:0 0 6px 0;font-size:18px}
-    .muted{color:var(--muted);font-size:13px;line-height:1.35}
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .space{height:12px}
-    .time{font-size:72px;font-weight:900;letter-spacing:-2px;line-height:1}
-    .pill{display:inline-block;padding:7px 10px;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#06222a;font-weight:900;font-size:12px}
-    button{
-      border:0;border-radius:12px;padding:10px 14px;
-      background:rgba(255,255,255,.10);color:var(--text);
-      font-weight:800;cursor:pointer
-    }
-    button.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#06222a}
-    button.danger{background:linear-gradient(90deg,var(--danger),#ff9aa6);color:#2a0206}
-    button:active{transform:translateY(1px)}
-    input,select{
-      background:rgba(0,0,0,.18);
-      border:1px solid rgba(255,255,255,.14);
-      color:var(--text);
-      border-radius:12px;
-      padding:10px 12px;
-      font-weight:800;
-      outline:none;
-    }
-    input[type="number"]{width:98px;text-align:center}
-    .small{font-size:12px;color:var(--muted)}
-    .list{display:flex;flex-direction:column;gap:8px;max-height:430px;overflow:auto;padding-right:6px}
-    .item{display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);border-radius:14px;padding:10px}
-    .item input[type="text"]{flex:1;min-width:150px;background:transparent;border:0;padding:0}
-    .item .mini{width:86px}
-    .btnmini{padding:8px 10px;border-radius:10px;font-weight:900}
-    .hr{height:1px;background:rgba(255,255,255,.12);margin:14px 0}
-    .toggle label{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
-    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted)}
-    @media (max-width:950px){.wrap{grid-template-columns:1fr}}
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <!-- TIMER -->
-    <div class="card">
-      <div class="row" style="justify-content:space-between">
-        <div>
-          <h1>Timer</h1>
-          <div class="muted">Simple interval timer + CO₂ builder. Sound is unlocked when you press Start or Test sound.</div>
-        </div>
-        <span class="pill" id="statusPill">READY</span>
-      </div>
-
-      <div class="space"></div>
-
-      <div class="time" id="timeDisplay">00:00</div>
-      <div class="muted" id="currentLabel">—</div>
-
-      <div class="space"></div>
-
-      <div class="row">
-        <button class="primary" id="startPauseBtn">Start</button>
-        <button id="nextBtn">Next</button>
-        <button id="testSoundBtn">Test sound</button>
-        <button class="danger" id="resetBtn">Reset</button>
-      </div>
-
-      <div class="space"></div>
-
-      <div class="row">
-        <div class="toggle">
-          <label><input type="checkbox" id="autoAdvance" checked> Auto-advance</label>
-          <label><input type="checkbox" id="soundOn" checked> Sound</label>
-          <label><input type="checkbox" id="vibrateOn" checked> Vibrate</label>
-        </div>
-      </div>
-
-      <div class="space"></div>
-
-      <div class="row">
-        <div>
-          <div class="small">Rounds</div>
-          <input type="number" id="rounds" min="1" value="1" />
-        </div>
-        <div>
-          <div class="small">Countdown beeps</div>
-          <input type="number" id="countdownBeeps" min="0" value="3" />
-        </div>
-      </div>
-
-      <div class="hr"></div>
-
-      <div class="row">
-        <button id="saveBtn">Save</button>
-        <button id="exportBtn">Export JSON</button>
-        <button id="importBtn">Import JSON</button>
-        <input id="fileInput" type="file" accept=".json,application/json" style="display:none;">
-      </div>
-
-      <div class="space"></div>
-      <div class="small">Saved workouts</div>
-      <div class="list" id="savedList"></div>
-    </div>
-
-    <!-- BUILDER + EDITOR -->
-    <div class="card">
-      <div class="row" style="justify-content:space-between">
-        <div>
-          <h1>Intervals</h1>
-          <div class="muted">Edit list directly, or generate with CO₂ builder.</div>
-        </div>
-        <div class="kbd">/timer/</div>
-      </div>
-
-      <div class="space"></div>
-
-      <div class="row">
-        <button id="addRowBtn">Add interval</button>
-        <button id="clearBtn">Clear</button>
-        <button id="buildCO2Btn">Build CO₂</button>
-        <button id="loadTabataBtn">Load Tabata</button>
-      </div>
-
-      <div class="space"></div>
-
-      <div class="row">
-        <div>
-          <div class="small">Hold min (sec)</div>
-          <input type="number" id="co2HoldMin" min="10" max="180" value="25" />
-        </div>
-        <div>
-          <div class="small">Hold max (sec)</div>
-          <input type="number" id="co2HoldMax" min="10" max="180" value="60" />
-        </div>
-        <div>
-          <div class="small">Total duration (min)</div>
-          <input type="number" id="co2TotalMin" min="3" max="20" value="10" />
-        </div>
-        <div>
-          <div class="small">Recovery (sec)</div>
-          <input type="number" id="co2Recovery" min="10" max="240" value="60" />
-        </div>
-        <div>
-          <div class="small">Warm-up (sec)</div>
-          <input type="number" id="co2Warmup" min="0" max="300" value="45" />
-        </div>
-        <div>
-          <div class="small">Hold type</div>
-          <select id="co2HoldType">
-            <option value="inhale" selected>hold on inhale</option>
-            <option value="exhale">hold on exhale</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="space"></div>
-
-      <div class="list" id="intervalList"></div>
-
-      <div class="hr"></div>
-      <div class="muted">CO₂ builder ramps hold time from min → max and fills to your target duration. Last recovery may be shortened.</div>
-    </div>
-  </div>
-
-<script>
-(() => {
-  // DOM
-  const timeDisplay = document.getElementById("timeDisplay");
-  const currentLabel = document.getElementById("currentLabel");
-  const statusPill = document.getElementById("statusPill");
-
-  const startPauseBtn = document.getElementById("startPauseBtn");
-  const nextBtn = document.getElementById("nextBtn");
-  const resetBtn = document.getElementById("resetBtn");
-  const testSoundBtn = document.getElementById("testSoundBtn");
-
-  const roundsEl = document.getElementById("rounds");
-  const autoAdvanceEl = document.getElementById("autoAdvance");
-  const soundOnEl = document.getElementById("soundOn");
-  const vibrateOnEl = document.getElementById("vibrateOn");
-  const countdownBeepsEl = document.getElementById("countdownBeeps");
-
-  const intervalListEl = document.getElementById("intervalList");
-  const addRowBtn = document.getElementById("addRowBtn");
-  const clearBtn = document.getElementById("clearBtn");
-  const buildCO2Btn = document.getElementById("buildCO2Btn");
-  const loadTabataBtn = document.getElementById("loadTabataBtn");
-
-  const co2HoldMinEl = document.getElementById("co2HoldMin");
-  const co2HoldMaxEl = document.getElementById("co2HoldMax");
-  const co2TotalMinEl = document.getElementById("co2TotalMin");
-  const co2RecoveryEl = document.getElementById("co2Recovery");
-  const co2WarmupEl = document.getElementById("co2Warmup");
-  const co2HoldTypeEl = document.getElementById("co2HoldType");
-
-  const saveBtn = document.getElementById("saveBtn");
-  const exportBtn = document.getElementById("exportBtn");
-  const importBtn = document.getElementById("importBtn");
-  const fileInput = document.getElementById("fileInput");
-  const savedListEl = document.getElementById("savedList");
-
-  // State
-  let intervals = [];
-  let currentIndex = 0;
-  let currentRound = 1;
-  let remaining = 0;
-  let running = false;
-  let timerId = null;
-
-  const LS_SAVED = "adam.timer.saved.v3";
-  const LS_EDITOR = "adam.timer.editor.v3";
-
-  // Utils
-  const pad2 = (n) => String(n).padStart(2,"0");
-  const mmss = (sec) => {
-    sec = Math.max(0, Math.floor(sec));
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    return `${pad2(m)}:${pad2(s)}`;
-  };
-  const clampInt = (v, lo, hi) => {
-    let n = parseInt(v || "0", 10);
-    if (Number.isNaN(n)) n = lo;
-    return Math.max(lo, Math.min(hi, n));
-  };
-  const escapeHtml = (s) => String(s)
-    .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
-
-  function setStatus(t){ statusPill.textContent = t; }
-  function getRounds(){ return Math.max(1, parseInt(roundsEl.value || "1", 10)); }
-  function setLabel(){
-    if (!intervals.length){ currentLabel.textContent = "—"; return; }
-    const it = intervals[currentIndex];
-    currentLabel.textContent = `Round ${currentRound}/${getRounds()} • ${it.name} • ${it.sec}s`;
-  }
-
-  // Audio (iOS-safe): single context, unlocked by button tap
-  let audioCtx = null;
-  function ensureAudio(){
-    if (!soundOnEl.checked) return null;
-    if (!audioCtx){
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === "suspended"){
-      audioCtx.resume().catch(()=>{});
-    }
-    return audioCtx;
-  }
-  function beep(freq=880, ms=140){
-    if (!soundOnEl.checked) return;
-    const ctx = ensureAudio();
-    if (!ctx) return;
-    try{
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.type = "sine";
-      o.frequency.value = freq;
-      g.gain.value = 0.14; // loud enough
-      o.connect(g); g.connect(ctx.destination);
-      o.start();
-      setTimeout(()=>{ o.stop(); }, ms);
-    }catch(e){}
-  }
-  function vibrate(ms=120){
-    if (!vibrateOnEl.checked) return;
-    if (navigator.vibrate) navigator.vibrate(ms);
-  }
-
-  function tick(){
-    if (!running) return;
-
-    const cb = Math.max(0, parseInt(countdownBeepsEl.value || "0", 10));
-    if (remaining <= cb && remaining > 0) beep(880, 80);
-
-    remaining -= 1;
-    timeDisplay.textContent = mmss(remaining);
-
-    if (remaining <= 0){
-      beep(440, 180);
-      vibrate(160);
-
-      if (!autoAdvanceEl.checked){
-        pause();
-        setStatus("DONE");
-        return;
-      }
-      nextInterval();
-    }
-  }
-
-  function start(){
-    if (!intervals.length){ alert("Add at least one interval first."); return; }
-    ensureAudio(); // unlock audio from user gesture
-    if (running) return;
-
-    if (remaining <= 0){
-      currentIndex = Math.min(currentIndex, intervals.length - 1);
-      remaining = intervals[currentIndex].sec;
-    }
-
-    running = true;
-    setStatus("RUNNING");
-    startPauseBtn.textContent = "Pause";
-    timerId = setInterval(tick, 1000);
-    setLabel();
-    timeDisplay.textContent = mmss(remaining);
-  }
-
-  function pause(){
-    running = false;
-    setStatus("PAUSED");
-    startPauseBtn.textContent = "Start";
-    if (timerId){ clearInterval(timerId); timerId = null; }
-  }
-
-  function resetAll(){
-    pause();
-    currentIndex = 0;
-    currentRound = 1;
-    remaining = intervals.length ? intervals[0].sec : 0;
-    setStatus("READY");
-    setLabel();
-    timeDisplay.textContent = mmss(remaining);
-  }
-
-  function nextInterval(){
-    if (!intervals.length) return;
-
-    currentIndex += 1;
-    if (currentIndex >= intervals.length){
-      currentIndex = 0;
-      currentRound += 1;
-    }
-    if (currentRound > getRounds()){
-      pause();
-      setStatus("DONE");
-      remaining = 0;
-      timeDisplay.textContent = "00:00";
-      setLabel();
-      return;
-    }
-    remaining = intervals[currentIndex].sec;
-    setLabel();
-    timeDisplay.textContent = mmss(remaining);
-  }
-
-  function renderIntervals(){
-    intervalListEl.innerHTML = "";
-
-    if (!intervals.length){
-      const div = document.createElement("div");
-      div.className = "muted";
-      div.textContent = "No intervals yet. Click “Build CO₂” or “Add interval”.";
-      intervalListEl.appendChild(div);
-      setLabel();
-      timeDisplay.textContent = "00:00";
-      return;
-    }
-
-    intervals.forEach((it, idx) => {
-      const row = document.createElement("div");
-      row.className = "item";
-      row.innerHTML = `
-        <button class="btnmini" data-act="up" title="Move up">↑</button>
-        <button class="btnmini" data-act="down" title="Move down">↓</button>
-        <input type="text" value="${escapeHtml(it.name)}" data-field="name" aria-label="name">
-        <input class="mini" type="number" min="1" value="${it.sec}" data-field="sec" aria-label="seconds">
-        <button class="btnmini" data-act="del" title="Delete">✕</button>
-      `;
-
-      row.querySelector('[data-field="name"]').addEventListener("input", (e) => {
-        it.name = e.target.value;
-        setLabel();
-        saveEditor();
-      });
-      row.querySelector('[data-field="sec"]').addEventListener("input", (e) => {
-        const v = Math.max(1, parseInt(e.target.value || "1", 10));
-        it.sec = v;
-        if (idx === currentIndex && !running){
-          remaining = v;
-          timeDisplay.textContent = mmss(remaining);
-        }
-        setLabel();
-        saveEditor();
-      });
-
-      row.querySelector('[data-act="del"]').addEventListener("click", () => {
-        intervals.splice(idx, 1);
-        if (currentIndex >= intervals.length) currentIndex = Math.max(0, intervals.length - 1);
-        renderIntervals();
-        resetAll();
-        saveEditor();
-      });
-      row.querySelector('[data-act="up"]').addEventListener("click", () => {
-        if (idx <= 0) return;
-        [intervals[idx-1], intervals[idx]] = [intervals[idx], intervals[idx-1]];
-        renderIntervals();
-        saveEditor();
-      });
-      row.querySelector('[data-act="down"]').addEventListener("click", () => {
-        if (idx >= intervals.length - 1) return;
-        [intervals[idx+1], intervals[idx]] = [intervals[idx], intervals[idx+1]];
-        renderIntervals();
-        saveEditor();
-      });
-
-      intervalListEl.appendChild(row);
-    });
-
-    if (!running){
-      currentIndex = Math.min(currentIndex, intervals.length - 1);
-      remaining = intervals[currentIndex].sec;
-      timeDisplay.textContent = mmss(remaining);
-      setLabel();
-    }
-  }
-
-  function addInterval(name="New interval", sec=30){
-    intervals.push({ name, sec });
-    renderIntervals();
-    resetAll();
-    saveEditor();
-  }
-
-  function clearIntervals(){
-    if (!confirm("Clear all intervals?")) return;
-    intervals = [];
-    renderIntervals();
-    resetAll();
-    saveEditor();
-  }
-
-  function buildCO2Workout(){
-    const holdMin = clampInt(co2HoldMinEl.value, 10, 180);
-    const holdMax = clampInt(co2HoldMaxEl.value, 10, 180);
-    const totalMin = clampInt(co2TotalMinEl.value, 3, 20);
-    const recoveryBase = clampInt(co2RecoveryEl.value, 10, 240);
-    const warmup = clampInt(co2WarmupEl.value, 0, 300);
-    const holdType = (co2HoldTypeEl.value === "exhale") ? "exhale" : "inhale";
-
-    const minH = Math.min(holdMin, holdMax);
-    const maxH = Math.max(holdMin, holdMax);
-    const targetSec = totalMin * 60;
-
-    const out = [];
-    let elapsed = 0;
-
-    if (warmup > 0){
-      out.push({ name: "Breathe normally", sec: warmup });
-      elapsed += warmup;
-    }
-
-    // Estimate cycles, then ramp holds linearly across cycles
-    const approxCycle = ((minH + maxH)/2) + recoveryBase;
-    let cycles = Math.max(2, Math.floor((targetSec - elapsed) / approxCycle));
-    cycles = Math.min(cycles, 40);
-
-    const holdLabel = holdType === "exhale"
-      ? "Exhale & hold — hold on exhale"
-      : "Inhale & hold — hold on inhale";
-
-    for (let i=0; i<cycles; i++){
-      const t = cycles === 1 ? 0 : (i/(cycles-1));
-      let holdSec = Math.round(minH + t*(maxH-minH));
-
-      if (elapsed >= targetSec) break;
-      if (elapsed + holdSec > targetSec) holdSec = Math.max(1, targetSec - elapsed);
-      out.push({ name: holdLabel, sec: holdSec });
-      elapsed += holdSec;
-
-      if (elapsed >= targetSec) break;
-      let recSec = recoveryBase;
-      if (elapsed + recSec > targetSec) recSec = Math.max(1, targetSec - elapsed);
-      out.push({ name: "Recovery breathe", sec: recSec });
-      elapsed += recSec;
-    }
-
-    if (elapsed < targetSec){
-      out.push({ name: "Breathe normally", sec: targetSec - elapsed });
-      elapsed = targetSec;
-    }
-
-    intervals = out;
-    roundsEl.value = 1;
-    renderIntervals();
-    resetAll();
-    saveEditor();
-  }
-
-  function loadTabata(){
-    intervals = [
-      { name: "Work", sec: 20 },
-      { name: "Rest", sec: 10 }
-    ];
-    roundsEl.value = 8;
-    renderIntervals();
-    resetAll();
-    saveEditor();
-  }
-
-  // Saved workouts
-  function loadSaved(){
-    try{ return JSON.parse(localStorage.getItem(LS_SAVED) || "[]"); }
-    catch(e){ return []; }
-  }
-  function saveSaved(list){ localStorage.setItem(LS_SAVED, JSON.stringify(list)); }
-
-  function renderSavedList(){
-    const list = loadSaved();
-    savedListEl.innerHTML = "";
-    if (!list.length){
-      const div = document.createElement("div");
-      div.className = "muted";
-      div.textContent = "No saved workouts.";
-      savedListEl.appendChild(div);
-      return;
-    }
-    list.forEach((w, idx) => {
-      const el = document.createElement("div");
-      el.className = "item";
-      el.innerHTML = `
-        <div style="flex:1">
-          <div style="font-weight:900">${escapeHtml(w.name || ("Workout " + (idx+1)))}</div>
-          <div class="small">${(w.intervals||[]).length} intervals • rounds ${w.rounds||1}</div>
-        </div>
-        <button class="btnmini" data-act="load">Load</button>
-        <button class="btnmini" data-act="del">Del</button>
-      `;
-      el.querySelector('[data-act="load"]').addEventListener("click", () => {
-        intervals = (w.intervals || []).map(x => ({ name: x.name, sec: Number(x.sec)||30 }));
-        roundsEl.value = w.rounds || 1;
-        renderIntervals(); resetAll(); saveEditor();
-      });
-      el.querySelector('[data-act="del"]').addEventListener("click", () => {
-        if (!confirm("Delete saved workout?")) return;
-        const L = loadSaved();
-        L.splice(idx, 1);
-        saveSaved(L);
-        renderSavedList();
-      });
-      savedListEl.appendChild(el);
-    });
-  }
-
-  function saveEditor(){
-    try{
-      localStorage.setItem(LS_EDITOR, JSON.stringify({ rounds: getRounds(), intervals }));
-    }catch(e){}
-  }
-  function loadEditor(){
-    try{
-      const s = JSON.parse(localStorage.getItem(LS_EDITOR) || "null");
-      if (s && Array.isArray(s.intervals) && s.intervals.length){
-        intervals = s.intervals.map(x => ({ name: x.name, sec: Number(x.sec)||30 }));
-        roundsEl.value = s.rounds || 1;
-        return true;
-      }
-    }catch(e){}
-    return false;
-  }
-
-  // JSON import/export
-  function exportJSON(){
-    const payload = { name: "Workout", rounds: getRounds(), intervals };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `workout-${Date.now()}.json`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-  function importJSONFile(file){
-    const reader = new FileReader();
-    reader.onload = () => {
-      try{
-        const obj = JSON.parse(reader.result);
-        const arr = obj.intervals || obj.exercises || obj;
-        if (!Array.isArray(arr)) throw new Error("No intervals array found");
-        intervals = arr.map(x => ({
-          name: x.name || "Interval",
-          sec: Number(x.sec ?? x.duration ?? x.durationSeconds ?? 30)
-        }));
-        roundsEl.value = obj.rounds || 1;
-        renderIntervals(); resetAll(); saveEditor();
-      }catch(e){
-        alert("Import failed: " + e.message);
-      }
-    };
-    reader.readAsText(file);
-  }
-
-  // Events
-  startPauseBtn.addEventListener("click", () => running ? pause() : start());
-  nextBtn.addEventListener("click", () => {
-    ensureAudio();
-    if (!intervals.length) return;
-    if (!running) setStatus("READY");
-    nextInterval();
-    if (!running) timeDisplay.textContent = mmss(remaining);
-  });
-  resetBtn.addEventListener("click", () => {
-    ensureAudio();
-    if (!confirm("Reset timer?")) return;
-    resetAll();
-  });
-  testSoundBtn.addEventListener("click", () => {
-    ensureAudio();
-    beep(880, 200);
-    setTimeout(()=>beep(660, 200), 240);
-  });
-
-  addRowBtn.addEventListener("click", () => addInterval());
-  clearBtn.addEventListener("click", clearIntervals);
-  buildCO2Btn.addEventListener("click", buildCO2Workout);
-  loadTabataBtn.addEventListener("click", loadTabata);
-
-  roundsEl.addEventListener("input", () => {
-    roundsEl.value = Math.max(1, parseInt(roundsEl.value || "1", 10));
-    setLabel();
-    saveEditor();
-  });
-
-  saveBtn.addEventListener("click", () => {
-    const name = prompt("Workout name:", "My workout");
-    if (!name) return;
-    const list = loadSaved();
-    list.push({ name, rounds: getRounds(), intervals });
-    saveSaved(list);
-    renderSavedList();
-  });
-
-  exportBtn.addEventListener("click", exportJSON);
-  importBtn.addEventListener("click", () => fileInput.click());
-  fileInput.addEventListener("change", (e) => {
-    const f = e.target.files && e.target.files[0];
-    if (!f) return;
-    importJSONFile(f);
-    fileInput.value = "";
-  });
-
-  // Init
-  const loaded = loadEditor();
-  if (!loaded){
-    buildCO2Workout();
-  } else {
-    renderIntervals(); resetAll();
-  }
-  renderSavedList();
-})();
-</script>
-</body>
-</html>
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/timer/index.html b/timer/index.html
+index bbebe645d19ca94f8a75544b06c6dfb5501f6273..6bd3a9efa2545f6f153c042ba9d7eb46b6cf2a44 100644
+--- a/timer/index.html
++++ b/timer/index.html
+@@ -41,50 +41,51 @@
+       font-weight:800;cursor:pointer
+     }
+     button.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#06222a}
+     button.danger{background:linear-gradient(90deg,var(--danger),#ff9aa6);color:#2a0206}
+     button:active{transform:translateY(1px)}
+     input,select{
+       background:rgba(0,0,0,.18);
+       border:1px solid rgba(255,255,255,.14);
+       color:var(--text);
+       border-radius:12px;
+       padding:10px 12px;
+       font-weight:800;
+       outline:none;
+     }
+     input[type="number"]{width:98px;text-align:center}
+     .small{font-size:12px;color:var(--muted)}
+     .list{display:flex;flex-direction:column;gap:8px;max-height:430px;overflow:auto;padding-right:6px}
+     .item{display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.06);
+       border:1px solid rgba(255,255,255,.10);border-radius:14px;padding:10px}
+     .item input[type="text"]{flex:1;min-width:150px;background:transparent;border:0;padding:0}
+     .item .mini{width:86px}
+     .btnmini{padding:8px 10px;border-radius:10px;font-weight:900}
+     .hr{height:1px;background:rgba(255,255,255,.12);margin:14px 0}
+     .toggle label{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+     .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted)}
++    .json-box{width:100%;min-height:120px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.4}
+     @media (max-width:950px){.wrap{grid-template-columns:1fr}}
+   </style>
+ </head>
+ <body>
+   <div class="wrap">
+     <!-- TIMER -->
+     <div class="card">
+       <div class="row" style="justify-content:space-between">
+         <div>
+           <h1>Timer</h1>
+           <div class="muted">Simple interval timer + CO₂ builder. Sound is unlocked when you press Start or Test sound.</div>
+         </div>
+         <span class="pill" id="statusPill">READY</span>
+       </div>
+ 
+       <div class="space"></div>
+ 
+       <div class="time" id="timeDisplay">00:00</div>
+       <div class="muted" id="currentLabel">—</div>
+ 
+       <div class="space"></div>
+ 
+       <div class="row">
+         <button class="primary" id="startPauseBtn">Start</button>
+         <button id="nextBtn">Next</button>
+@@ -102,50 +103,57 @@
+         </div>
+       </div>
+ 
+       <div class="space"></div>
+ 
+       <div class="row">
+         <div>
+           <div class="small">Rounds</div>
+           <input type="number" id="rounds" min="1" value="1" />
+         </div>
+         <div>
+           <div class="small">Countdown beeps</div>
+           <input type="number" id="countdownBeeps" min="0" value="3" />
+         </div>
+       </div>
+ 
+       <div class="hr"></div>
+ 
+       <div class="row">
+         <button id="saveBtn">Save</button>
+         <button id="exportBtn">Export JSON</button>
+         <button id="importBtn">Import JSON</button>
+         <input id="fileInput" type="file" accept=".json,application/json" style="display:none;">
+       </div>
+ 
++      <div class="space"></div>
++      <div class="small">Paste JSON</div>
++      <textarea id="jsonInput" class="json-box" placeholder='{"rounds":1,"intervals":[{"name":"Warmup","sec":60},{"name":"Work","sec":30}]}'></textarea>
++      <div class="row">
++        <button id="importTextBtn">Import from text</button>
++      </div>
++
+       <div class="space"></div>
+       <div class="small">Saved workouts</div>
+       <div class="list" id="savedList"></div>
+     </div>
+ 
+     <!-- BUILDER + EDITOR -->
+     <div class="card">
+       <div class="row" style="justify-content:space-between">
+         <div>
+           <h1>Intervals</h1>
+           <div class="muted">Edit list directly, or generate with CO₂ builder.</div>
+         </div>
+         <div class="kbd">/timer/</div>
+       </div>
+ 
+       <div class="space"></div>
+ 
+       <div class="row">
+         <button id="addRowBtn">Add interval</button>
+         <button id="clearBtn">Clear</button>
+         <button id="buildCO2Btn">Build CO₂</button>
+         <button id="loadTabataBtn">Load Tabata</button>
+       </div>
+ 
+       <div class="space"></div>
+@@ -202,50 +210,52 @@
+   const testSoundBtn = document.getElementById("testSoundBtn");
+ 
+   const roundsEl = document.getElementById("rounds");
+   const autoAdvanceEl = document.getElementById("autoAdvance");
+   const soundOnEl = document.getElementById("soundOn");
+   const vibrateOnEl = document.getElementById("vibrateOn");
+   const countdownBeepsEl = document.getElementById("countdownBeeps");
+ 
+   const intervalListEl = document.getElementById("intervalList");
+   const addRowBtn = document.getElementById("addRowBtn");
+   const clearBtn = document.getElementById("clearBtn");
+   const buildCO2Btn = document.getElementById("buildCO2Btn");
+   const loadTabataBtn = document.getElementById("loadTabataBtn");
+ 
+   const co2HoldMinEl = document.getElementById("co2HoldMin");
+   const co2HoldMaxEl = document.getElementById("co2HoldMax");
+   const co2TotalMinEl = document.getElementById("co2TotalMin");
+   const co2RecoveryEl = document.getElementById("co2Recovery");
+   const co2WarmupEl = document.getElementById("co2Warmup");
+   const co2HoldTypeEl = document.getElementById("co2HoldType");
+ 
+   const saveBtn = document.getElementById("saveBtn");
+   const exportBtn = document.getElementById("exportBtn");
+   const importBtn = document.getElementById("importBtn");
+   const fileInput = document.getElementById("fileInput");
++  const jsonInput = document.getElementById("jsonInput");
++  const importTextBtn = document.getElementById("importTextBtn");
+   const savedListEl = document.getElementById("savedList");
+ 
+   // State
+   let intervals = [];
+   let currentIndex = 0;
+   let currentRound = 1;
+   let remaining = 0;
+   let running = false;
+   let timerId = null;
+ 
+   const LS_SAVED = "adam.timer.saved.v3";
+   const LS_EDITOR = "adam.timer.editor.v3";
+ 
+   // Utils
+   const pad2 = (n) => String(n).padStart(2,"0");
+   const mmss = (sec) => {
+     sec = Math.max(0, Math.floor(sec));
+     const m = Math.floor(sec / 60);
+     const s = sec % 60;
+     return `${pad2(m)}:${pad2(s)}`;
+   };
+   const clampInt = (v, lo, hi) => {
+     let n = parseInt(v || "0", 10);
+     if (Number.isNaN(n)) n = lo;
+     return Math.max(lo, Math.min(hi, n));
+@@ -577,106 +587,122 @@
+   function loadEditor(){
+     try{
+       const s = JSON.parse(localStorage.getItem(LS_EDITOR) || "null");
+       if (s && Array.isArray(s.intervals) && s.intervals.length){
+         intervals = s.intervals.map(x => ({ name: x.name, sec: Number(x.sec)||30 }));
+         roundsEl.value = s.rounds || 1;
+         return true;
+       }
+     }catch(e){}
+     return false;
+   }
+ 
+   // JSON import/export
+   function exportJSON(){
+     const payload = { name: "Workout", rounds: getRounds(), intervals };
+     const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+     const url = URL.createObjectURL(blob);
+     const a = document.createElement("a");
+     a.href = url;
+     a.download = `workout-${Date.now()}.json`;
+     document.body.appendChild(a);
+     a.click();
+     a.remove();
+     URL.revokeObjectURL(url);
+   }
++  function parseJSONText(text){
++    const obj = JSON.parse(text);
++    const arr = obj.intervals || obj.exercises || obj;
++    if (!Array.isArray(arr)) throw new Error("No intervals array found");
++    intervals = arr.map(x => ({
++      name: x.name || "Interval",
++      sec: Number(x.sec ?? x.duration ?? x.durationSeconds ?? 30)
++    }));
++    roundsEl.value = obj.rounds || 1;
++    renderIntervals(); resetAll(); saveEditor();
++  }
+   function importJSONFile(file){
+     const reader = new FileReader();
+     reader.onload = () => {
+       try{
+-        const obj = JSON.parse(reader.result);
+-        const arr = obj.intervals || obj.exercises || obj;
+-        if (!Array.isArray(arr)) throw new Error("No intervals array found");
+-        intervals = arr.map(x => ({
+-          name: x.name || "Interval",
+-          sec: Number(x.sec ?? x.duration ?? x.durationSeconds ?? 30)
+-        }));
+-        roundsEl.value = obj.rounds || 1;
+-        renderIntervals(); resetAll(); saveEditor();
++        parseJSONText(reader.result);
+       }catch(e){
+         alert("Import failed: " + e.message);
+       }
+     };
+     reader.readAsText(file);
+   }
+ 
+   // Events
+   startPauseBtn.addEventListener("click", () => running ? pause() : start());
+   nextBtn.addEventListener("click", () => {
+     ensureAudio();
+     if (!intervals.length) return;
+     if (!running) setStatus("READY");
+     nextInterval();
+     if (!running) timeDisplay.textContent = mmss(remaining);
+   });
+   resetBtn.addEventListener("click", () => {
+     ensureAudio();
+     if (!confirm("Reset timer?")) return;
+     resetAll();
+   });
+   testSoundBtn.addEventListener("click", () => {
+     ensureAudio();
+     beep(880, 200);
+     setTimeout(()=>beep(660, 200), 240);
+   });
+ 
+   addRowBtn.addEventListener("click", () => addInterval());
+   clearBtn.addEventListener("click", clearIntervals);
+   buildCO2Btn.addEventListener("click", buildCO2Workout);
+   loadTabataBtn.addEventListener("click", loadTabata);
+ 
+   roundsEl.addEventListener("input", () => {
+     roundsEl.value = Math.max(1, parseInt(roundsEl.value || "1", 10));
+     setLabel();
+     saveEditor();
+   });
+ 
+   saveBtn.addEventListener("click", () => {
+     const name = prompt("Workout name:", "My workout");
+     if (!name) return;
+     const list = loadSaved();
+     list.push({ name, rounds: getRounds(), intervals });
+     saveSaved(list);
+     renderSavedList();
+   });
+ 
+   exportBtn.addEventListener("click", exportJSON);
+   importBtn.addEventListener("click", () => fileInput.click());
++  importTextBtn.addEventListener("click", () => {
++    const text = jsonInput.value.trim();
++    if (!text){
++      alert("Paste JSON first.");
++      return;
++    }
++    try{
++      parseJSONText(text);
++      jsonInput.value = "";
++    }catch(e){
++      alert("Import failed: " + e.message);
++    }
++  });
+   fileInput.addEventListener("change", (e) => {
+     const f = e.target.files && e.target.files[0];
+     if (!f) return;
+     importJSONFile(f);
+     fileInput.value = "";
+   });
+ 
+   // Init
+   const loaded = loadEditor();
+   if (!loaded){
+     buildCO2Workout();
+   } else {
+     renderIntervals(); resetAll();
+   }
+   renderSavedList();
+ })();
+ </script>
+ </body>
+ </html>
+ 
+EOF
+)
