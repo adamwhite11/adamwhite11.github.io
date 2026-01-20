@@ -1,303 +1,1125 @@
- (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
-diff --git a/timer/index.html b/timer/index.html
-index bbebe645d19ca94f8a75544b06c6dfb5501f6273..6bd3a9efa2545f6f153c042ba9d7eb46b6cf2a44 100644
---- a/timer/index.html
-+++ b/timer/index.html
-@@ -41,50 +41,51 @@
-       font-weight:800;cursor:pointer
-     }
-     button.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#06222a}
-     button.danger{background:linear-gradient(90deg,var(--danger),#ff9aa6);color:#2a0206}
-     button:active{transform:translateY(1px)}
-     input,select{
-       background:rgba(0,0,0,.18);
-       border:1px solid rgba(255,255,255,.14);
-       color:var(--text);
-       border-radius:12px;
-       padding:10px 12px;
-       font-weight:800;
-       outline:none;
-     }
-     input[type="number"]{width:98px;text-align:center}
-     .small{font-size:12px;color:var(--muted)}
-     .list{display:flex;flex-direction:column;gap:8px;max-height:430px;overflow:auto;padding-right:6px}
-     .item{display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.06);
-       border:1px solid rgba(255,255,255,.10);border-radius:14px;padding:10px}
-     .item input[type="text"]{flex:1;min-width:150px;background:transparent;border:0;padding:0}
-     .item .mini{width:86px}
-     .btnmini{padding:8px 10px;border-radius:10px;font-weight:900}
-     .hr{height:1px;background:rgba(255,255,255,.12);margin:14px 0}
-     .toggle label{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
-     .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted)}
-+    .json-box{width:100%;min-height:120px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.4}
-     @media (max-width:950px){.wrap{grid-template-columns:1fr}}
-   </style>
- </head>
- <body>
-   <div class="wrap">
-     <!-- TIMER -->
-     <div class="card">
-       <div class="row" style="justify-content:space-between">
-         <div>
-           <h1>Timer</h1>
-           <div class="muted">Simple interval timer + CO₂ builder. Sound is unlocked when you press Start or Test sound.</div>
-         </div>
-         <span class="pill" id="statusPill">READY</span>
-       </div>
- 
-       <div class="space"></div>
- 
-       <div class="time" id="timeDisplay">00:00</div>
-       <div class="muted" id="currentLabel">—</div>
- 
-       <div class="space"></div>
- 
-       <div class="row">
-         <button class="primary" id="startPauseBtn">Start</button>
-         <button id="nextBtn">Next</button>
-@@ -102,50 +103,57 @@
-         </div>
-       </div>
- 
-       <div class="space"></div>
- 
-       <div class="row">
-         <div>
-           <div class="small">Rounds</div>
-           <input type="number" id="rounds" min="1" value="1" />
-         </div>
-         <div>
-           <div class="small">Countdown beeps</div>
-           <input type="number" id="countdownBeeps" min="0" value="3" />
-         </div>
-       </div>
- 
-       <div class="hr"></div>
- 
-       <div class="row">
-         <button id="saveBtn">Save</button>
-         <button id="exportBtn">Export JSON</button>
-         <button id="importBtn">Import JSON</button>
-         <input id="fileInput" type="file" accept=".json,application/json" style="display:none;">
-       </div>
- 
-+      <div class="space"></div>
-+      <div class="small">Paste JSON</div>
-+      <textarea id="jsonInput" class="json-box" placeholder='{"rounds":1,"intervals":[{"name":"Warmup","sec":60},{"name":"Work","sec":30}]}'></textarea>
-+      <div class="row">
-+        <button id="importTextBtn">Import from text</button>
-+      </div>
-+
-       <div class="space"></div>
-       <div class="small">Saved workouts</div>
-       <div class="list" id="savedList"></div>
-     </div>
- 
-     <!-- BUILDER + EDITOR -->
-     <div class="card">
-       <div class="row" style="justify-content:space-between">
-         <div>
-           <h1>Intervals</h1>
-           <div class="muted">Edit list directly, or generate with CO₂ builder.</div>
-         </div>
-         <div class="kbd">/timer/</div>
-       </div>
- 
-       <div class="space"></div>
- 
-       <div class="row">
-         <button id="addRowBtn">Add interval</button>
-         <button id="clearBtn">Clear</button>
-         <button id="buildCO2Btn">Build CO₂</button>
-         <button id="loadTabataBtn">Load Tabata</button>
-       </div>
- 
-       <div class="space"></div>
-@@ -202,50 +210,52 @@
-   const testSoundBtn = document.getElementById("testSoundBtn");
- 
-   const roundsEl = document.getElementById("rounds");
-   const autoAdvanceEl = document.getElementById("autoAdvance");
-   const soundOnEl = document.getElementById("soundOn");
-   const vibrateOnEl = document.getElementById("vibrateOn");
-   const countdownBeepsEl = document.getElementById("countdownBeeps");
- 
-   const intervalListEl = document.getElementById("intervalList");
-   const addRowBtn = document.getElementById("addRowBtn");
-   const clearBtn = document.getElementById("clearBtn");
-   const buildCO2Btn = document.getElementById("buildCO2Btn");
-   const loadTabataBtn = document.getElementById("loadTabataBtn");
- 
-   const co2HoldMinEl = document.getElementById("co2HoldMin");
-   const co2HoldMaxEl = document.getElementById("co2HoldMax");
-   const co2TotalMinEl = document.getElementById("co2TotalMin");
-   const co2RecoveryEl = document.getElementById("co2Recovery");
-   const co2WarmupEl = document.getElementById("co2Warmup");
-   const co2HoldTypeEl = document.getElementById("co2HoldType");
- 
-   const saveBtn = document.getElementById("saveBtn");
-   const exportBtn = document.getElementById("exportBtn");
-   const importBtn = document.getElementById("importBtn");
-   const fileInput = document.getElementById("fileInput");
-+  const jsonInput = document.getElementById("jsonInput");
-+  const importTextBtn = document.getElementById("importTextBtn");
-   const savedListEl = document.getElementById("savedList");
- 
-   // State
-   let intervals = [];
-   let currentIndex = 0;
-   let currentRound = 1;
-   let remaining = 0;
-   let running = false;
-   let timerId = null;
- 
-   const LS_SAVED = "adam.timer.saved.v3";
-   const LS_EDITOR = "adam.timer.editor.v3";
- 
-   // Utils
-   const pad2 = (n) => String(n).padStart(2,"0");
-   const mmss = (sec) => {
-     sec = Math.max(0, Math.floor(sec));
-     const m = Math.floor(sec / 60);
-     const s = sec % 60;
-     return `${pad2(m)}:${pad2(s)}`;
-   };
-   const clampInt = (v, lo, hi) => {
-     let n = parseInt(v || "0", 10);
-     if (Number.isNaN(n)) n = lo;
-     return Math.max(lo, Math.min(hi, n));
-@@ -577,106 +587,122 @@
-   function loadEditor(){
-     try{
-       const s = JSON.parse(localStorage.getItem(LS_EDITOR) || "null");
-       if (s && Array.isArray(s.intervals) && s.intervals.length){
-         intervals = s.intervals.map(x => ({ name: x.name, sec: Number(x.sec)||30 }));
-         roundsEl.value = s.rounds || 1;
-         return true;
-       }
-     }catch(e){}
-     return false;
-   }
- 
-   // JSON import/export
-   function exportJSON(){
-     const payload = { name: "Workout", rounds: getRounds(), intervals };
-     const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
-     const url = URL.createObjectURL(blob);
-     const a = document.createElement("a");
-     a.href = url;
-     a.download = `workout-${Date.now()}.json`;
-     document.body.appendChild(a);
-     a.click();
-     a.remove();
-     URL.revokeObjectURL(url);
-   }
-+  function parseJSONText(text){
-+    const obj = JSON.parse(text);
-+    const arr = obj.intervals || obj.exercises || obj;
-+    if (!Array.isArray(arr)) throw new Error("No intervals array found");
-+    intervals = arr.map(x => ({
-+      name: x.name || "Interval",
-+      sec: Number(x.sec ?? x.duration ?? x.durationSeconds ?? 30)
-+    }));
-+    roundsEl.value = obj.rounds || 1;
-+    renderIntervals(); resetAll(); saveEditor();
-+  }
-   function importJSONFile(file){
-     const reader = new FileReader();
-     reader.onload = () => {
-       try{
--        const obj = JSON.parse(reader.result);
--        const arr = obj.intervals || obj.exercises || obj;
--        if (!Array.isArray(arr)) throw new Error("No intervals array found");
--        intervals = arr.map(x => ({
--          name: x.name || "Interval",
--          sec: Number(x.sec ?? x.duration ?? x.durationSeconds ?? 30)
--        }));
--        roundsEl.value = obj.rounds || 1;
--        renderIntervals(); resetAll(); saveEditor();
-+        parseJSONText(reader.result);
-       }catch(e){
-         alert("Import failed: " + e.message);
-       }
-     };
-     reader.readAsText(file);
-   }
- 
-   // Events
-   startPauseBtn.addEventListener("click", () => running ? pause() : start());
-   nextBtn.addEventListener("click", () => {
-     ensureAudio();
-     if (!intervals.length) return;
-     if (!running) setStatus("READY");
-     nextInterval();
-     if (!running) timeDisplay.textContent = mmss(remaining);
-   });
-   resetBtn.addEventListener("click", () => {
-     ensureAudio();
-     if (!confirm("Reset timer?")) return;
-     resetAll();
-   });
-   testSoundBtn.addEventListener("click", () => {
-     ensureAudio();
-     beep(880, 200);
-     setTimeout(()=>beep(660, 200), 240);
-   });
- 
-   addRowBtn.addEventListener("click", () => addInterval());
-   clearBtn.addEventListener("click", clearIntervals);
-   buildCO2Btn.addEventListener("click", buildCO2Workout);
-   loadTabataBtn.addEventListener("click", loadTabata);
- 
-   roundsEl.addEventListener("input", () => {
-     roundsEl.value = Math.max(1, parseInt(roundsEl.value || "1", 10));
-     setLabel();
-     saveEditor();
-   });
- 
-   saveBtn.addEventListener("click", () => {
-     const name = prompt("Workout name:", "My workout");
-     if (!name) return;
-     const list = loadSaved();
-     list.push({ name, rounds: getRounds(), intervals });
-     saveSaved(list);
-     renderSavedList();
-   });
- 
-   exportBtn.addEventListener("click", exportJSON);
-   importBtn.addEventListener("click", () => fileInput.click());
-+  importTextBtn.addEventListener("click", () => {
-+    const text = jsonInput.value.trim();
-+    if (!text){
-+      alert("Paste JSON first.");
-+      return;
-+    }
-+    try{
-+      parseJSONText(text);
-+      jsonInput.value = "";
-+    }catch(e){
-+      alert("Import failed: " + e.message);
-+    }
-+  });
-   fileInput.addEventListener("change", (e) => {
-     const f = e.target.files && e.target.files[0];
-     if (!f) return;
-     importJSONFile(f);
-     fileInput.value = "";
-   });
- 
-   // Init
-   const loaded = loadEditor();
-   if (!loaded){
-     buildCO2Workout();
-   } else {
-     renderIntervals(); resetAll();
-   }
-   renderSavedList();
- })();
- </script>
- </body>
- </html>
- 
-EOF
-)
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CO₂ Tolerance Timer + Tendon Routine</title>
+  <style>
+    :root{
+      --bg:#0b0f17;
+      --card:#121a2a;
+      --card2:#0f1626;
+      --text:#e8eefc;
+      --muted:#a8b3cc;
+      --line:#22314f;
+      --accent:#6aa9ff;
+      --accent2:#7cffc1;
+      --warn:#ffcc66;
+      --danger:#ff6a6a;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: radial-gradient(1200px 800px at 20% -10%, rgba(106,169,255,.25), transparent 60%),
+                  radial-gradient(900px 700px at 120% 10%, rgba(124,255,193,.18), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+    a{color:var(--accent)}
+    .wrap{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 18px 14px 40px;
+    }
+    header{
+      display:flex; gap:12px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap;
+      margin-bottom: 14px;
+    }
+    h1{margin:0; font-size: 22px; letter-spacing:.2px}
+    .subtitle{margin:2px 0 0; color:var(--muted); font-size:13px}
+    .tabs{
+      display:flex; gap:8px; align-items:center;
+      background: rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:999px;
+      padding:6px;
+    }
+    .tab{
+      border:0;
+      background:transparent;
+      color:var(--muted);
+      padding:10px 12px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:600;
+      font-size:13px;
+    }
+    .tab.active{
+      background: rgba(106,169,255,.18);
+      color: var(--text);
+      border:1px solid rgba(106,169,255,.35);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 860px){
+      .grid{grid-template-columns: 1.1fr .9fr}
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding: 14px 14px 10px;
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      background: rgba(0,0,0,.12);
+    }
+    .card .hd h2{
+      margin:0; font-size: 14px; letter-spacing:.2px;
+      color: var(--text);
+    }
+    .card .bd{padding: 14px}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .row > *{flex:1 1 auto}
+    .muted{color:var(--muted); font-size:12px}
+    .sep{height:10px}
+
+    .big{
+      font-variant-numeric: tabular-nums;
+      font-size: 54px;
+      line-height: 1;
+      letter-spacing: .5px;
+      margin: 0;
+    }
+    .phase{
+      margin-top: 6px;
+      font-size: 15px;
+      color: var(--muted);
+      letter-spacing:.2px;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.03);
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .pill b{color:var(--text); font-weight:700}
+
+    .btnbar{display:flex; gap:10px; flex-wrap:wrap}
+    button{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-weight:700;
+      letter-spacing:.2px;
+      transition: transform .04s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
+      user-select:none;
+    }
+    button:active{transform: scale(.99)}
+    button.primary{
+      background: rgba(106,169,255,.22);
+      border-color: rgba(106,169,255,.40);
+    }
+    button.good{
+      background: rgba(124,255,193,.18);
+      border-color: rgba(124,255,193,.35);
+    }
+    button.warn{
+      background: rgba(255,204,102,.15);
+      border-color: rgba(255,204,102,.35);
+    }
+    button.danger{
+      background: rgba(255,106,106,.16);
+      border-color: rgba(255,106,106,.35);
+    }
+    button:disabled{opacity:.45; cursor:not-allowed}
+
+    .control{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items:center;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .control label{font-weight:700; font-size:13px}
+    .control .val{
+      font-variant-numeric: tabular-nums;
+      font-weight:800;
+      color: var(--text);
+      min-width: 80px;
+      text-align:right;
+    }
+    input[type="range"]{width:100%}
+    input[type="checkbox"]{transform: scale(1.15)}
+    input[type="number"]{
+      width: 90px;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      font-weight:700;
+    }
+    textarea{
+      width:100%;
+      min-height: 160px;
+      padding: 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+    }
+    .tinybtn{
+      padding: 9px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight:800;
+    }
+
+    .list{
+      display:flex; flex-direction:column; gap:8px;
+    }
+    .item{
+      display:flex; justify-content:space-between; gap:10px; align-items:flex-start;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .item .name{font-weight:800; font-size:13px}
+    .item .note{color:var(--muted); font-size:12px; margin-top:2px}
+    .item .rt{color:var(--muted); font-size:12px; white-space:nowrap}
+    .hidden{display:none !important;}
+
+    .footerNote{
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>CO₂ Tolerance Timer</h1>
+        <div class="subtitle">Adjust hold + total duration. Sound + vibration on phase changes.</div>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Sections">
+        <button class="tab active" id="tab-timer" role="tab" aria-selected="true">Timer</button>
+        <button class="tab" id="tab-tendon" role="tab" aria-selected="false">Tendon Routine</button>
+      </div>
+    </header>
+
+    <section id="view-timer">
+      <div class="grid">
+        <div class="card">
+          <div class="hd">
+            <h2>Session</h2>
+            <span class="pill"><span>Cycle</span> <b id="cycle">0</b></span>
+          </div>
+          <div class="bd">
+            <p class="big" id="phaseTime">00:00</p>
+            <div class="phase" id="phaseLabel">Ready</div>
+            <div class="sep"></div>
+            <div class="row">
+              <span class="pill"><span>Total left</span> <b id="totalLeft">00:00</b></span>
+              <span class="pill"><span>Elapsed</span> <b id="elapsed">00:00</b></span>
+              <span class="pill"><span>Status</span> <b id="status">Stopped</b></span>
+            </div>
+            <div class="sep"></div>
+            <div class="btnbar">
+              <button class="primary" id="startBtn">Start</button>
+              <button class="good" id="pauseBtn" disabled>Pause</button>
+              <button class="good" id="resumeBtn" disabled>Resume</button>
+              <button class="danger" id="stopBtn" disabled>Stop</button>
+              <button class="tinybtn" id="resetSettingsBtn" title="Resets settings to defaults">Reset settings</button>
+            </div>
+            <div class="footerNote">
+              Notes: CO₂ tolerance work can make you lightheaded. Do this seated, stop if you feel unwell, and don’t do it in water or while driving.
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="hd">
+            <h2>Settings</h2>
+            <span class="pill"><span>Saved</span> <b id="savedState">Yes</b></span>
+          </div>
+          <div class="bd">
+            <div class="control">
+              <div>
+                <label for="holdSec">Hold time (seconds)</label>
+                <div class="muted">Reasonable range: ~25–90s (you can go wider if you want)</div>
+              </div>
+              <div class="val" id="holdVal">45s</div>
+              <input id="holdSec" type="range" min="10" max="120" step="5" />
+              <div></div>
+            </div>
+
+            <div class="sep"></div>
+
+            <div class="control">
+              <div>
+                <label for="restSec">Breathe/rest time (seconds)</label>
+                <div class="muted">Time between holds (normal breathing)</div>
+              </div>
+              <div class="val" id="restVal">20s</div>
+              <input id="restSec" type="range" min="5" max="90" step="5" />
+              <div></div>
+            </div>
+
+            <div class="sep"></div>
+
+            <div class="control">
+              <div>
+                <label for="totalMin">Total workout duration (minutes)</label>
+                <div class="muted">Your stated range: ~3–20 min</div>
+              </div>
+              <div class="val" id="totalVal">8:00</div>
+              <input id="totalMin" type="range" min="3" max="20" step="1" />
+              <div></div>
+            </div>
+
+            <div class="sep"></div>
+
+            <div class="control">
+              <div>
+                <label>Hold cue</label>
+                <div class="muted">Choose wording for the hold phase</div>
+              </div>
+              <div class="val">
+                <label style="display:flex;gap:10px;align-items:center;justify-content:flex-end">
+                  <input type="checkbox" id="holdOnInhale" />
+                  <span style="font-weight:800">Hold on inhale</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="sep"></div>
+
+            <div class="control">
+              <div>
+                <label>Sound + vibration</label>
+                <div class="muted">Sound requires user interaction (Start/Resume) on many phones</div>
+              </div>
+              <div class="val" style="display:flex;gap:10px;justify-content:flex-end;align-items:center">
+                <label style="display:flex;gap:10px;align-items:center">
+                  <input type="checkbox" id="soundOn" />
+                  <span style="font-weight:800">Sound</span>
+                </label>
+                <label style="display:flex;gap:10px;align-items:center">
+                  <input type="checkbox" id="vibeOn" />
+                  <span style="font-weight:800">Vibe</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="sep"></div>
+
+            <div class="control">
+              <div>
+                <label for="volume">Volume</label>
+                <div class="muted">Only used if Sound is on</div>
+              </div>
+              <div class="val" id="volVal">70%</div>
+              <input id="volume" type="range" min="0" max="100" step="5" />
+              <div></div>
+            </div>
+
+            <div class="sep"></div>
+
+            <div class="row">
+              <button class="tinybtn" id="copySettingsBtn">Copy settings JSON</button>
+              <button class="tinybtn" id="loadSettingsBtn">Load JSON</button>
+            </div>
+            <div class="sep"></div>
+            <textarea id="jsonBox" spellcheck="false" placeholder='Settings JSON will appear here. You can paste a JSON object and tap "Load JSON".'></textarea>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column:1/-1">
+          <div class="hd">
+            <h2>Log</h2>
+            <span class="pill"><span>Events</span> <b id="logCount">0</b></span>
+          </div>
+          <div class="bd">
+            <div class="list" id="log"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-tendon" class="hidden">
+      <div class="grid">
+        <div class="card" style="grid-column:1/-1">
+          <div class="hd">
+            <h2>Tendon Strengthening (quick template)</h2>
+            <span class="pill"><span>Editable</span> <b>Yes</b></span>
+          </div>
+          <div class="bd">
+            <div class="muted" style="margin-bottom:10px">
+              This is a simple checklist you can tweak. If you want the exact routine we discussed earlier, tell me what moves you want and I’ll lock it in.
+            </div>
+
+            <div class="list" id="tendonList"></div>
+
+            <div class="sep"></div>
+            <div class="row">
+              <button class="tinybtn" id="tendonAdd">Add item</button>
+              <button class="tinybtn danger" id="tendonClear">Clear all</button>
+              <button class="tinybtn" id="tendonCopy">Copy routine JSON</button>
+              <button class="tinybtn" id="tendonLoad">Load JSON</button>
+            </div>
+
+            <div class="sep"></div>
+            <textarea id="tendonJson" spellcheck="false" placeholder='Routine JSON will appear here. Paste JSON and tap "Load JSON".'></textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    /***********************
+     * Utilities
+     ***********************/
+    const $ = (id) => document.getElementById(id);
+    const pad2 = (n) => String(n).padStart(2,'0');
+    const clamp = (x,min,max) => Math.min(max, Math.max(min,x));
+    function fmtMMSS(totalSec){
+      totalSec = Math.max(0, Math.floor(totalSec));
+      const m = Math.floor(totalSec/60);
+      const s = totalSec%60;
+      return `${pad2(m)}:${pad2(s)}`;
+    }
+    function fmtMSS(totalSec){
+      totalSec = Math.max(0, Math.floor(totalSec));
+      const m = Math.floor(totalSec/60);
+      const s = totalSec%60;
+      return `${m}:${pad2(s)}`;
+    }
+    function nowMs(){ return performance.now(); }
+
+    /***********************
+     * State (Timer)
+     ***********************/
+    const DEFAULTS = {
+      holdSec: 45,
+      restSec: 20,
+      totalMin: 8,
+      holdOnInhale: true,
+      soundOn: false,
+      vibeOn: true,
+      volume: 70
+    };
+
+    const STORAGE_KEY = "co2_timer_settings_v2";
+    const TIMER_LOG_KEY = "co2_timer_log_v2";
+
+    const timer = {
+      running: false,
+      paused: false,
+      phase: "ready", // ready | prep | rest | hold | done
+      cycle: 0,
+      totalTargetSec: 0,
+      elapsedSec: 0,
+      phaseRemainingSec: 0,
+
+      // internal timekeeping
+      lastTickMs: 0,
+      accumMs: 0,
+      phasePlan: null, // {name, durSec}
+      audio: null
+    };
+
+    /***********************
+     * Audio (Web Audio API)
+     * Reliable on iOS if created after a user gesture (Start/Resume)
+     ***********************/
+    function ensureAudio(){
+      if (timer.audio) return timer.audio;
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const gain = ctx.createGain();
+      gain.connect(ctx.destination);
+      timer.audio = { ctx, gain };
+      applyVolume();
+      return timer.audio;
+    }
+
+    function applyVolume(){
+      const vol = clamp(+$("volume").value, 0, 100) / 100;
+      $("volVal").textContent = `${Math.round(vol*100)}%`;
+      if (timer.audio) timer.audio.gain.gain.value = vol * 0.35; // cap to a safe-ish level
+    }
+
+    function beep(pattern="short"){
+      if (!$("soundOn").checked) return;
+      const { ctx, gain } = ensureAudio();
+      if (ctx.state === "suspended") ctx.resume().catch(()=>{});
+      const t0 = ctx.currentTime;
+
+      const seq = (pattern === "start") ? [0, .07, .14] :
+                  (pattern === "phase") ? [0, .08] :
+                  (pattern === "end") ? [0, .12, .24, .36] :
+                  [0];
+
+      seq.forEach((dt, i) => {
+        const o = ctx.createOscillator();
+        o.type = "sine";
+        o.frequency.value = (pattern === "end") ? 880 : (pattern === "start" ? 740 : 660);
+        o.connect(gain);
+        const on = t0 + dt;
+        const off = on + (pattern === "short" ? 0.09 : 0.10);
+        try{
+          o.start(on);
+          o.stop(off);
+        }catch(e){}
+      });
+    }
+
+    function vibrate(ms){
+      if (!$("vibeOn").checked) return;
+      if (!navigator.vibrate) return;
+      try{ navigator.vibrate(ms); }catch(e){}
+    }
+
+    /***********************
+     * Logging
+     ***********************/
+    function addLog(title, detail){
+      const el = document.createElement("div");
+      el.className = "item";
+      const left = document.createElement("div");
+      const right = document.createElement("div");
+      right.className = "rt";
+
+      const name = document.createElement("div");
+      name.className = "name";
+      name.textContent = title;
+
+      const note = document.createElement("div");
+      note.className = "note";
+      note.textContent = detail || "";
+
+      const ts = new Date();
+      right.textContent = ts.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit", second:"2-digit"});
+
+      left.appendChild(name);
+      if (detail) left.appendChild(note);
+      el.appendChild(left);
+      el.appendChild(right);
+
+      const log = $("log");
+      log.prepend(el);
+
+      // keep log at a sane length
+      while (log.children.length > 50) log.removeChild(log.lastChild);
+      $("logCount").textContent = String(log.children.length);
+      saveLog();
+    }
+
+    function saveLog(){
+      const items = Array.from($("log").children).map(x => {
+        const name = x.querySelector(".name")?.textContent || "";
+        const note = x.querySelector(".note")?.textContent || "";
+        const rt = x.querySelector(".rt")?.textContent || "";
+        return { name, note, rt };
+      });
+      localStorage.setItem(TIMER_LOG_KEY, JSON.stringify(items));
+    }
+
+    function loadLog(){
+      try{
+        const raw = localStorage.getItem(TIMER_LOG_KEY);
+        if (!raw) return;
+        const items = JSON.parse(raw);
+        $("log").innerHTML = "";
+        items.reverse().forEach(it => {
+          // reverse because addLog prepends; we want same visual order
+          const el = document.createElement("div");
+          el.className = "item";
+          const left = document.createElement("div");
+          const right = document.createElement("div");
+          right.className = "rt";
+          right.textContent = it.rt || "";
+
+          const name = document.createElement("div");
+          name.className = "name";
+          name.textContent = it.name || "";
+
+          left.appendChild(name);
+          if (it.note){
+            const note = document.createElement("div");
+            note.className = "note";
+            note.textContent = it.note;
+            left.appendChild(note);
+          }
+          el.appendChild(left);
+          el.appendChild(right);
+          $("log").prepend(el);
+        });
+        $("logCount").textContent = String($("log").children.length);
+      }catch(e){}
+    }
+
+    /***********************
+     * Settings load/save
+     ***********************/
+    function getSettings(){
+      return {
+        holdSec: +$("holdSec").value,
+        restSec: +$("restSec").value,
+        totalMin: +$("totalMin").value,
+        holdOnInhale: $("holdOnInhale").checked,
+        soundOn: $("soundOn").checked,
+        vibeOn: $("vibeOn").checked,
+        volume: +$("volume").value
+      };
+    }
+
+    function setSettings(s){
+      $("holdSec").value = clamp(s.holdSec ?? DEFAULTS.holdSec, 10, 120);
+      $("restSec").value = clamp(s.restSec ?? DEFAULTS.restSec, 5, 90);
+      $("totalMin").value = clamp(s.totalMin ?? DEFAULTS.totalMin, 3, 20);
+      $("holdOnInhale").checked = !!(s.holdOnInhale ?? DEFAULTS.holdOnInhale);
+      $("soundOn").checked = !!(s.soundOn ?? DEFAULTS.soundOn);
+      $("vibeOn").checked = !!(s.vibeOn ?? DEFAULTS.vibeOn);
+      $("volume").value = clamp(s.volume ?? DEFAULTS.volume, 0, 100);
+
+      syncSettingLabels();
+      applyVolume();
+      markSaved(true);
+    }
+
+    function syncSettingLabels(){
+      $("holdVal").textContent = `${+$("holdSec").value}s`;
+      $("restVal").textContent = `${+$("restSec").value}s`;
+      const totalSec = (+$("totalMin").value) * 60;
+      $("totalVal").textContent = fmtMSS(totalSec);
+      $("volVal").textContent = `${+$("volume").value}%`;
+    }
+
+    function markSaved(isSaved){
+      $("savedState").textContent = isSaved ? "Yes" : "No";
+    }
+
+    function saveSettings(){
+      const s = getSettings();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+      markSaved(true);
+    }
+
+    function loadSettings(){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return setSettings(DEFAULTS);
+      try{
+        const s = JSON.parse(raw);
+        setSettings({ ...DEFAULTS, ...s });
+      }catch(e){
+        setSettings(DEFAULTS);
+      }
+    }
+
+    /***********************
+     * Timer Engine
+     ***********************/
+    function setStatus(text){ $("status").textContent = text; }
+
+    function cueTextForHold(){
+      return $("holdOnInhale").checked ? "Inhale, then HOLD" : "Exhale, then HOLD";
+    }
+
+    function nextPhasePlan(){
+      const s = getSettings();
+      if (timer.phase === "ready"){
+        timer.phase = "prep";
+        return { name: "Get ready", durSec: 5 };
+      }
+      if (timer.phase === "prep"){
+        timer.phase = "rest";
+        timer.cycle = 1;
+        return { name: "Breathe normally", durSec: s.restSec };
+      }
+      if (timer.phase === "rest"){
+        timer.phase = "hold";
+        return { name: cueTextForHold(), durSec: s.holdSec };
+      }
+      if (timer.phase === "hold"){
+        timer.phase = "rest";
+        timer.cycle += 1;
+        return { name: "Breathe normally", durSec: s.restSec };
+      }
+      return null;
+    }
+
+    function updateUI(){
+      $("cycle").textContent = String(timer.cycle);
+      $("elapsed").textContent = fmtMMSS(timer.elapsedSec);
+      const totalLeft = Math.max(0, timer.totalTargetSec - timer.elapsedSec);
+      $("totalLeft").textContent = fmtMMSS(totalLeft);
+      $("phaseTime").textContent = fmtMMSS(timer.phaseRemainingSec);
+      $("phaseLabel").textContent = (timer.phase === "hold") ? cueTextForHold() :
+                                   (timer.phase === "rest") ? "Breathe normally" :
+                                   (timer.phase === "prep") ? "Get ready" :
+                                   (timer.phase === "done") ? "Done" : "Ready";
+    }
+
+    function startSession(){
+      if (timer.running) return;
+      const s = getSettings();
+
+      // create audio context (if enabled) in response to user gesture
+      if (s.soundOn) ensureAudio();
+
+      timer.running = true;
+      timer.paused = false;
+      timer.phase = "ready";
+      timer.cycle = 0;
+      timer.elapsedSec = 0;
+      timer.totalTargetSec = s.totalMin * 60;
+
+      // prime phase
+      timer.phasePlan = nextPhasePlan();
+      timer.phaseRemainingSec = timer.phasePlan?.durSec ?? 0;
+
+      timer.lastTickMs = nowMs();
+      timer.accumMs = 0;
+
+      $("startBtn").disabled = true;
+      $("pauseBtn").disabled = false;
+      $("resumeBtn").disabled = true;
+      $("stopBtn").disabled = false;
+
+      setStatus("Running");
+      addLog("Started", `Hold ${s.holdSec}s / Rest ${s.restSec}s / Total ${s.totalMin}m`);
+      beep("start");
+      vibrate(60);
+      tickLoop();
+      updateUI();
+    }
+
+    function pauseSession(){
+      if (!timer.running || timer.paused) return;
+      timer.paused = true;
+      setStatus("Paused");
+      $("pauseBtn").disabled = true;
+      $("resumeBtn").disabled = false;
+      addLog("Paused", "");
+      beep("short");
+      vibrate(40);
+      updateUI();
+    }
+
+    function resumeSession(){
+      if (!timer.running || !timer.paused) return;
+
+      // audio resume after user gesture (helpful on iOS)
+      if ($("soundOn").checked) ensureAudio();
+
+      timer.paused = false;
+      timer.lastTickMs = nowMs();
+      timer.accumMs = 0;
+      setStatus("Running");
+      $("pauseBtn").disabled = false;
+      $("resumeBtn").disabled = true;
+      addLog("Resumed", "");
+      beep("short");
+      vibrate(40);
+      tickLoop();
+    }
+
+    function stopSession(manual=true){
+      if (!timer.running) return;
+      timer.running = false;
+      timer.paused = false;
+      timer.phase = "done";
+      timer.phaseRemainingSec = 0;
+      setStatus("Stopped");
+
+      $("startBtn").disabled = false;
+      $("pauseBtn").disabled = true;
+      $("resumeBtn").disabled = true;
+      $("stopBtn").disabled = true;
+
+      if (manual){
+        addLog("Stopped", `Elapsed ${fmtMMSS(timer.elapsedSec)}`);
+        beep("end");
+        vibrate(120);
+      }
+      updateUI();
+    }
+
+    function advancePhase(){
+      timer.phasePlan = nextPhasePlan();
+      if (!timer.phasePlan){
+        stopSession(false);
+        return;
+      }
+      timer.phaseRemainingSec = timer.phasePlan.durSec;
+
+      // signal phase change
+      addLog("Phase", timer.phasePlan.name);
+      beep("phase");
+      vibrate(70);
+      updateUI();
+    }
+
+    function tickLoop(){
+      if (!timer.running) return;
+      if (timer.paused) return;
+
+      const ms = nowMs();
+      const dt = ms - timer.lastTickMs;
+      timer.lastTickMs = ms;
+      timer.accumMs += dt;
+
+      while (timer.accumMs >= 1000){
+        timer.accumMs -= 1000;
+
+        // total time
+        timer.elapsedSec += 1;
+
+        // phase time
+        timer.phaseRemainingSec -= 1;
+
+        // end condition (hard stop at total duration)
+        if (timer.elapsedSec >= timer.totalTargetSec){
+          timer.running = false;
+          timer.phase = "done";
+          timer.phaseRemainingSec = 0;
+
+          $("startBtn").disabled = false;
+          $("pauseBtn").disabled = true;
+          $("resumeBtn").disabled = true;
+          $("stopBtn").disabled = true;
+
+          setStatus("Done");
+          addLog("Completed", `Total ${fmtMMSS(timer.totalTargetSec)}`);
+          beep("end");
+          vibrate(150);
+          updateUI();
+          return;
+        }
+
+        // phase change
+        if (timer.phaseRemainingSec <= 0){
+          advancePhase();
+        } else {
+          updateUI();
+        }
+      }
+
+      requestAnimationFrame(tickLoop);
+    }
+
+    /***********************
+     * Settings JSON import/export
+     ***********************/
+    function settingsToJson(){
+      const s = getSettings();
+      return JSON.stringify(s, null, 2);
+    }
+
+    function loadJsonIntoSettings(){
+      const raw = $("jsonBox").value.trim();
+      if (!raw) return;
+      try{
+        const obj = JSON.parse(raw);
+        setSettings({ ...DEFAULTS, ...obj });
+        saveSettings();
+        addLog("Settings loaded", "From JSON");
+      }catch(e){
+        addLog("JSON error", "Could not parse settings JSON");
+        alert("Could not parse JSON. Make sure it's a valid JSON object.");
+      }
+    }
+
+    async function copyText(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        return true;
+      }catch(e){
+        return false;
+      }
+    }
+
+    /***********************
+     * Tendon routine (simple editable list)
+     ***********************/
+    const TENDON_KEY = "tendon_routine_v1";
+    let tendon = [];
+
+    function defaultTendon(){
+      return [
+        { name: "Doorway pec stretch", note: "60–90s", done: false },
+        { name: "Straight-arm hang", note: "30–60s", done: false },
+        { name: "Shoulder external rotation (band)", note: "2 x 12–20 slow", done: false },
+        { name: "Wrist extensor isometrics", note: "4 x 30–45s each side", done: false },
+        { name: "Calf isometrics", note: "4 x 30–45s", done: false }
+      ];
+    }
+
+    function saveTendon(){
+      localStorage.setItem(TENDON_KEY, JSON.stringify(tendon));
+    }
+
+    function loadTendon(){
+      try{
+        const raw = localStorage.getItem(TENDON_KEY);
+        tendon = raw ? JSON.parse(raw) : defaultTendon();
+      }catch(e){
+        tendon = defaultTendon();
+      }
+      renderTendon();
+    }
+
+    function renderTendon(){
+      const list = $("tendonList");
+      list.innerHTML = "";
+      tendon.forEach((it, idx) => {
+        const row = document.createElement("div");
+        row.className = "item";
+
+        const left = document.createElement("div");
+
+        const top = document.createElement("div");
+        top.className = "name";
+        top.style.display = "flex";
+        top.style.alignItems = "center";
+        top.style.gap = "10px";
+
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.checked = !!it.done;
+        cb.addEventListener("change", () => {
+          it.done = cb.checked;
+          saveTendon();
+        });
+
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.value = it.name || "";
+        nameInput.style.width = "100%";
+        nameInput.style.padding = "10px 10px";
+        nameInput.style.borderRadius = "12px";
+        nameInput.style.border = "1px solid rgba(255,255,255,.12)";
+        nameInput.style.background = "rgba(0,0,0,.18)";
+        nameInput.style.color = "var(--text)";
+        nameInput.style.fontWeight = "800";
+        nameInput.addEventListener("input", () => {
+          it.name = nameInput.value;
+          saveTendon();
+        });
+
+        top.appendChild(cb);
+        top.appendChild(nameInput);
+
+        const noteInput = document.createElement("input");
+        noteInput.type = "text";
+        noteInput.value = it.note || "";
+        noteInput.placeholder = "notes (sets/reps/time)";
+        noteInput.style.marginTop = "8px";
+        noteInput.style.width = "100%";
+        noteInput.style.padding = "10px 10px";
+        noteInput.style.borderRadius = "12px";
+        noteInput.style.border = "1px solid rgba(255,255,255,.12)";
+        noteInput.style.background = "rgba(0,0,0,.18)";
+        noteInput.style.color = "var(--text)";
+        noteInput.style.fontWeight = "700";
+        noteInput.addEventListener("input", () => {
+          it.note = noteInput.value;
+          saveTendon();
+        });
+
+        left.appendChild(top);
+        left.appendChild(noteInput);
+
+        const right = document.createElement("div");
+        right.className = "rt";
+        right.style.display = "flex";
+        right.style.flexDirection = "column";
+        right.style.gap = "8px";
+        right.style.alignItems = "flex-end";
+
+        const del = document.createElement("button");
+        del.className = "tinybtn danger";
+        del.textContent = "Delete";
+        del.addEventListener("click", () => {
+          tendon.splice(idx,1);
+          saveTendon();
+          renderTendon();
+        });
+
+        right.appendChild(del);
+        row.appendChild(left);
+        row.appendChild(right);
+        list.appendChild(row);
+      });
+
+      $("tendonJson").value = JSON.stringify(tendon, null, 2);
+    }
+
+    function tendonLoadFromJson(){
+      const raw = $("tendonJson").value.trim();
+      if (!raw) return;
+      try{
+        const obj = JSON.parse(raw);
+        if (!Array.isArray(obj)) throw new Error("Not an array");
+        tendon = obj.map(x => ({
+          name: String(x.name ?? ""),
+          note: String(x.note ?? ""),
+          done: !!x.done
+        }));
+        saveTendon();
+        renderTendon();
+      }catch(e){
+        alert("Could not parse routine JSON. It must be a JSON array.");
+      }
+    }
+
+    /***********************
+     * Tabs
+     ***********************/
+    function showTab(which){
+      const timerView = $("view-timer");
+      const tendonView = $("view-tendon");
+      const t1 = $("tab-timer");
+      const t2 = $("tab-tendon");
+
+      const isTimer = which === "timer";
+      timerView.classList.toggle("hidden", !isTimer);
+      tendonView.classList.toggle("hidden", isTimer);
+
+      t1.classList.toggle("active", isTimer);
+      t2.classList.toggle("active", !isTimer);
+      t1.setAttribute("aria-selected", isTimer ? "true" : "false");
+      t2.setAttribute("aria-selected", !isTimer ? "true" : "false");
+    }
+
+    /***********************
+     * Wire up UI
+     ***********************/
+    function wire(){
+      // tabs
+      $("tab-timer").addEventListener("click", () => showTab("timer"));
+      $("tab-tendon").addEventListener("click", () => showTab("tendon"));
+
+      // settings changes
+      ["holdSec","restSec","totalMin","holdOnInhale","soundOn","vibeOn","volume"].forEach(id => {
+        $(id).addEventListener("input", () => {
+          syncSettingLabels();
+          applyVolume();
+          markSaved(false);
+          saveSettings();
+        });
+        $(id).addEventListener("change", () => {
+          syncSettingLabels();
+          applyVolume();
+          markSaved(false);
+          saveSettings();
+        });
+      });
+
+      // buttons
+      $("startBtn").addEventListener("click", startSession);
+      $("pauseBtn").addEventListener("click", pauseSession);
+      $("resumeBtn").addEventListener("click", resumeSession);
+      $("stopBtn").addEventListener("click", () => stopSession(true));
+
+      $("resetSettingsBtn").addEventListener("click", () => {
+        if (timer.running) return;
+        setSettings(DEFAULTS);
+        saveSettings();
+        addLog("Settings reset", "");
+      });
+
+      // settings JSON
+      $("copySettingsBtn").addEventListener("click", async () => {
+        const text = settingsToJson();
+        $("jsonBox").value = text;
+        const ok = await copyText(text);
+        addLog("Settings copied", ok ? "Copied to clipboard" : "Copied to box (clipboard blocked)");
+        if (!ok) alert("Copied into the box, but clipboard was blocked by the browser.");
+      });
+
+      $("loadSettingsBtn").addEventListener("click", loadJsonIntoSettings);
+
+      // tendon
+      $("tendonAdd").addEventListener("click", () => {
+        tendon.unshift({ name: "New item", note: "", done: false });
+        saveTendon();
+        renderTendon();
+      });
+      $("tendonClear").addEventListener("click", () => {
+        tendon = [];
+        saveTendon();
+        renderTendon();
+      });
+      $("tendonCopy").addEventListener("click", async () => {
+        $("tendonJson").value = JSON.stringify(tendon, null, 2);
+        const ok = await copyText($("tendonJson").value);
+        if (!ok) alert("Clipboard blocked. JSON is in the box—copy it manually.");
+      });
+      $("tendonLoad").addEventListener("click", tendonLoadFromJson);
+
+      // keyboard shortcuts
+      window.addEventListener("keydown", (e) => {
+        if (e.key === " "){
+          // avoid scrolling with spacebar if focused outside inputs
+          const tag = (document.activeElement?.tagName || "").toLowerCase();
+          if (tag !== "input" && tag !== "textarea"){
+            e.preventDefault();
+            if (!timer.running) startSession();
+            else if (timer.running && !timer.paused) pauseSession();
+            else if (timer.running && timer.paused) resumeSession();
+          }
+        }
+        if (e.key.toLowerCase() === "s"){
+          if (timer.running) stopSession(true);
+        }
+      });
+    }
+
+    /***********************
+     * Init
+     ***********************/
+    (function init(){
+      loadSettings();
+      loadLog();
+      loadTendon();
+      syncSettingLabels();
+      applyVolume();
+      updateUI();
+      setStatus("Stopped");
+      wire();
+      addLog("Ready", "Adjust settings, then Start");
+    })();
+  </script>
+</body>
+</html>
