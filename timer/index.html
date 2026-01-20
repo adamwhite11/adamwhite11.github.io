@@ -57,7 +57,7 @@
       font-weight:700;
       outline:none;
     }
-    input[type="number"]{width:90px;text-align:center}
+    input[type="number"]{width:96px;text-align:center}
     .small{font-size:12px;color:var(--muted)}
     .list{display:flex;flex-direction:column;gap:8px;max-height:430px;overflow:auto;padding-right:6px}
     .item{display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.06);
@@ -65,7 +65,6 @@
     .item input[type="text"]{flex:1;min-width:150px;background:transparent;border:0;padding:0}
     .item .mini{width:86px}
     .item .btnmini{padding:8px 10px;border-radius:10px;font-weight:900}
-    .split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .hr{height:1px;background:rgba(255,255,255,.10);margin:14px 0}
     .toggle{display:flex;gap:10px;align-items:center}
     .toggle label{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
@@ -151,8 +150,40 @@
       <div class="row">
         <button id="addRowBtn">Add interval</button>
         <button id="clearBtn">Clear</button>
-        <button id="loadCO2Btn">Load CO₂ tolerance</button>
+        <button id="buildCO2Btn">Build CO₂</button>
         <button id="loadTabataBtn">Load Tabata</button>
+      </div>
+
+      <div class="space"></div>
+
+      <div class="row">
+        <div>
+          <div class="small">Hold min (sec)</div>
+          <input type="number" id="co2HoldMin" min="10" max="180" value="25" />
+        </div>
+        <div>
+          <div class="small">Hold max (sec)</div>
+          <input type="number" id="co2HoldMax" min="10" max="180" value="60" />
+        </div>
+        <div>
+          <div class="small">Total duration (min)</div>
+          <input type="number" id="co2TotalMin" min="3" max="20" value="10" />
+        </div>
+        <div>
+          <div class="small">Recovery (sec)</div>
+          <input type="number" id="co2Recovery" min="10" max="240" value="60" />
+        </div>
+        <div>
+          <div class="small">Warm-up (sec)</div>
+          <input type="number" id="co2Warmup" min="0" max="300" value="45" />
+        </div>
+        <div>
+          <div class="small">Hold type</div>
+          <select id="co2HoldType">
+            <option value="inhale" selected>hold on inhale</option>
+            <option value="exhale">hold on exhale</option>
+          </select>
+        </div>
       </div>
 
       <div class="space"></div>
@@ -160,23 +191,16 @@
       <div class="list" id="intervalList"></div>
 
       <div class="hr"></div>
-
-      <div class="split">
-        <div>
-          <div class="small">Tip</div>
-          <div class="muted">On iPhone: silent mode can mute audio. Keep Sound off if you prefer vibration-only.</div>
-        </div>
-        <div>
-          <div class="small">JSON format</div>
-          <div class="muted">Exports <span class="kbd">{ name, rounds, intervals:[{name,sec}] }</span></div>
-        </div>
+      <div class="muted">
+        CO₂ builder ramps hold time from min → max and fills the session to your total duration target.
+        Last recovery may be shortened to fit.
       </div>
     </div>
   </div>
 
 <script>
 (() => {
-  // ---------- DOM ----------
+  // DOM
   const timeDisplay = document.getElementById("timeDisplay");
   const currentLabel = document.getElementById("currentLabel");
   const statusPill = document.getElementById("statusPill");
@@ -194,8 +218,15 @@
   const intervalListEl = document.getElementById("intervalList");
   const addRowBtn = document.getElementById("addRowBtn");
   const clearBtn = document.getElementById("clearBtn");
-  const loadCO2Btn = document.getElementById("loadCO2Btn");
+  const buildCO2Btn = document.getElementById("buildCO2Btn");
   const loadTabataBtn = document.getElementById("loadTabataBtn");
+
+  const co2HoldMinEl = document.getElementById("co2HoldMin");
+  const co2HoldMaxEl = document.getElementById("co2HoldMax");
+  const co2TotalMinEl = document.getElementById("co2TotalMin");
+  const co2RecoveryEl = document.getElementById("co2Recovery");
+  const co2WarmupEl = document.getElementById("co2Warmup");
+  const co2HoldTypeEl = document.getElementById("co2HoldType");
 
   const saveBtn = document.getElementById("saveBtn");
   const exportBtn = document.getElementById("exportBtn");
@@ -203,7 +234,7 @@
   const fileInput = document.getElementById("fileInput");
   const savedListEl = document.getElementById("savedList");
 
-  // ---------- STATE ----------
+  // State
   let intervals = [];
   let currentIndex = 0;
   let currentRound = 1;
@@ -211,10 +242,10 @@
   let running = false;
   let timerId = null;
 
-  const LS_SAVED = "adam.timer.saved.v1";
-  const LS_EDITOR = "adam.timer.editor.v1";
+  const LS_SAVED = "adam.timer.saved.v2";
+  const LS_EDITOR = "adam.timer.editor.v2";
 
-  // ---------- UTIL ----------
+  // Utils
   const pad2 = (n) => String(n).padStart(2,"0");
   const mmss = (sec) => {
     sec = Math.max(0, Math.floor(sec));
@@ -222,22 +253,19 @@
     const s = sec % 60;
     return `${pad2(m)}:${pad2(s)}`;
   };
+  const clampInt = (v, lo, hi) => {
+    let n = parseInt(v || "0", 10);
+    if (Number.isNaN(n)) n = lo;
+    return Math.max(lo, Math.min(hi, n));
+  };
 
-  function setStatus(text){
-    statusPill.textContent = text;
-  }
+  function setStatus(text){ statusPill.textContent = text; }
+  function getRounds(){ return Math.max(1, parseInt(roundsEl.value || "1", 10)); }
 
   function setLabel(){
-    if (!intervals.length){
-      currentLabel.textContent = "—";
-      return;
-    }
+    if (!intervals.length){ currentLabel.textContent = "—"; return; }
     const it = intervals[currentIndex];
     currentLabel.textContent = `Round ${currentRound}/${getRounds()} • ${it.name} • ${it.sec}s`;
-  }
-
-  function getRounds(){
-    return Math.max(1, parseInt(roundsEl.value || "1", 10));
   }
 
   function beep(freq=880, ms=120){
@@ -263,17 +291,13 @@
   function tick(){
     if (!running) return;
 
-    // countdown beeps
     const cb = Math.max(0, parseInt(countdownBeepsEl.value || "0", 10));
-    if (remaining <= cb && remaining > 0){
-      beep(880, 80);
-    }
+    if (remaining <= cb && remaining > 0){ beep(880, 80); }
 
     remaining -= 1;
     timeDisplay.textContent = mmss(remaining);
 
     if (remaining <= 0){
-      // finished interval
       beep(440, 180);
       vibrate(160);
 
@@ -287,13 +311,9 @@
   }
 
   function start(){
-    if (!intervals.length){
-      alert("Add at least one interval first.");
-      return;
-    }
+    if (!intervals.length){ alert("Add at least one interval first."); return; }
     if (running) return;
 
-    // initialize if needed
     if (remaining <= 0){
       currentIndex = Math.min(currentIndex, intervals.length - 1);
       remaining = intervals[currentIndex].sec;
@@ -326,7 +346,6 @@
   }
 
   function nextInterval(){
-    // move index; handle rounds
     if (!intervals.length) return;
 
     currentIndex += 1;
@@ -349,14 +368,22 @@
     timeDisplay.textContent = mmss(remaining);
   }
 
-  // ---------- EDITOR ----------
+  // Editor
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;");
+  }
+
   function renderIntervals(){
     intervalListEl.innerHTML = "";
 
     if (!intervals.length){
       const div = document.createElement("div");
       div.className = "muted";
-      div.textContent = "No intervals yet. Click “Add interval” or load an example.";
+      div.textContent = "No intervals yet. Click “Add interval”, “Build CO₂”, or load an example.";
       intervalListEl.appendChild(div);
       setLabel();
       timeDisplay.textContent = "00:00";
@@ -416,21 +443,12 @@
       intervalListEl.appendChild(row);
     });
 
-    // if idle, sync remaining to current interval
     if (!running){
       currentIndex = Math.min(currentIndex, intervals.length - 1);
       remaining = intervals[currentIndex].sec;
       timeDisplay.textContent = mmss(remaining);
       setLabel();
     }
-  }
-
-  function escapeHtml(s){
-    return String(s)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;");
   }
 
   function addInterval(name="New interval", sec=30){
@@ -448,14 +466,71 @@
     saveEditor();
   }
 
-  // examples
-  function loadCO2(){
-    intervals = [
-      { name: "Breathe normally", sec: 60 },
-      { name: "Inhale & hold — hold on inhale", sec: 45 },
-      { name: "Recovery breathe", sec: 90 }
-    ];
-    roundsEl.value = 5;
+  // CO2 Builder
+  function buildCO2Workout(){
+    // guardrails align with what you described (still allows wider ranges)
+    const holdMin = clampInt(co2HoldMinEl.value, 10, 180);
+    const holdMax = clampInt(co2HoldMaxEl.value, 10, 180);
+    const totalMin = clampInt(co2TotalMinEl.value, 3, 20);
+    const recoveryBase = clampInt(co2RecoveryEl.value, 10, 240);
+    const warmup = clampInt(co2WarmupEl.value, 0, 300);
+    const holdType = co2HoldTypeEl.value === "exhale" ? "exhale" : "inhale";
+
+    const minH = Math.min(holdMin, holdMax);
+    const maxH = Math.max(holdMin, holdMax);
+
+    const targetSec = totalMin * 60;
+
+    // start fresh
+    const out = [];
+    let elapsed = 0;
+
+    if (warmup > 0){
+      out.push({ name: "Breathe normally", sec: warmup });
+      elapsed += warmup;
+    }
+
+    // choose number of cycles based on recovery and target time
+    // cycles roughly: hold + recovery
+    // we build progressively and truncate last recovery if needed.
+    const approxCycle = ((minH + maxH) / 2) + recoveryBase;
+    let cycles = Math.max(2, Math.floor((targetSec - elapsed) / approxCycle));
+    cycles = Math.min(cycles, 30); // sanity cap
+
+    // if target is tiny, still make at least 2 cycles
+    if (cycles < 2) cycles = 2;
+
+    for (let i=0; i<cycles; i++){
+      const t = cycles === 1 ? 0 : (i / (cycles - 1));
+      const holdSec = Math.round(minH + t * (maxH - minH));
+
+      const holdName = holdType === "exhale"
+        ? "Exhale & hold — hold on exhale"
+        : "Inhale & hold — hold on inhale";
+
+      // hold
+      if (elapsed >= targetSec) break;
+      let holdToUse = holdSec;
+      if (elapsed + holdToUse > targetSec) holdToUse = Math.max(1, targetSec - elapsed);
+      out.push({ name: holdName, sec: holdToUse });
+      elapsed += holdToUse;
+
+      // recovery
+      if (elapsed >= targetSec) break;
+      let recToUse = recoveryBase;
+      if (elapsed + recToUse > targetSec) recToUse = Math.max(1, targetSec - elapsed);
+      out.push({ name: "Recovery breathe", sec: recToUse });
+      elapsed += recToUse;
+    }
+
+    // if we undershot a bit (common), add a small finish breathe to hit target closer
+    if (elapsed < targetSec){
+      out.push({ name: "Breathe normally", sec: targetSec - elapsed });
+      elapsed = targetSec;
+    }
+
+    intervals = out;
+    roundsEl.value = 1;
     renderIntervals();
     resetAll();
     saveEditor();
@@ -472,15 +547,12 @@
     saveEditor();
   }
 
-  // ---------- SAVE / LOAD ----------
+  // Save / load
   function loadSaved(){
-    try{
-      return JSON.parse(localStorage.getItem(LS_SAVED) || "[]");
-    }catch(e){ return []; }
+    try{ return JSON.parse(localStorage.getItem(LS_SAVED) || "[]"); }
+    catch(e){ return []; }
   }
-  function saveSaved(list){
-    localStorage.setItem(LS_SAVED, JSON.stringify(list));
-  }
+  function saveSaved(list){ localStorage.setItem(LS_SAVED, JSON.stringify(list)); }
 
   function renderSavedList(){
     const list = loadSaved();
@@ -492,7 +564,6 @@
       savedListEl.appendChild(div);
       return;
     }
-
     list.forEach((w, idx) => {
       const el = document.createElement("div");
       el.className = "item";
@@ -544,11 +615,7 @@
   }
 
   function exportJSON(){
-    const payload = {
-      name: "Workout",
-      rounds: getRounds(),
-      intervals
-    };
+    const payload = { name: "Workout", rounds: getRounds(), intervals };
     const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -582,7 +649,7 @@
     reader.readAsText(file);
   }
 
-  // ---------- EVENTS ----------
+  // Events
   startPauseBtn.addEventListener("click", () => running ? pause() : start());
   nextBtn.addEventListener("click", () => {
     if (!intervals.length) return;
@@ -597,7 +664,7 @@
 
   addRowBtn.addEventListener("click", () => addInterval());
   clearBtn.addEventListener("click", clearIntervals);
-  loadCO2Btn.addEventListener("click", loadCO2);
+  buildCO2Btn.addEventListener("click", buildCO2Workout);
   loadTabataBtn.addEventListener("click", loadTabata);
 
   roundsEl.addEventListener("input", () => {
@@ -616,7 +683,6 @@
   });
 
   exportBtn.addEventListener("click", exportJSON);
-
   importBtn.addEventListener("click", () => fileInput.click());
   fileInput.addEventListener("change", (e) => {
     const f = e.target.files && e.target.files[0];
@@ -625,9 +691,12 @@
     fileInput.value = "";
   });
 
-  // ---------- INIT ----------
+  // Init
   const loaded = loadEditor();
-  if (!loaded) loadCO2();
+  if (!loaded){
+    // default a short CO2 session
+    buildCO2Workout();
+  }
   renderIntervals();
   resetAll();
   renderSavedList();
