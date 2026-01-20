@@ -7,11 +7,8 @@
   <style>
     :root{
       --bg:#0b0f17;
-      --card:#121a2a;
-      --card2:#0f1626;
       --text:#e8eefc;
       --muted:#a8b3cc;
-      --line:#22314f;
       --accent:#6aa9ff;
       --accent2:#7cffc1;
       --warn:#ffcc66;
@@ -29,198 +26,89 @@
                   var(--bg);
       color:var(--text);
     }
-    a{color:var(--accent)}
-    .wrap{
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 18px 14px 40px;
-    }
-    header{
-      display:flex; gap:12px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap;
-      margin-bottom: 14px;
-    }
-    h1{margin:0; font-size: 22px; letter-spacing:.2px}
-    .subtitle{margin:2px 0 0; color:var(--muted); font-size:13px}
-    .tabs{
-      display:flex; gap:8px; align-items:center;
-      background: rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:999px;
-      padding:6px;
-    }
-    .tab{
-      border:0;
-      background:transparent;
-      color:var(--muted);
-      padding:10px 12px;
-      border-radius:999px;
-      cursor:pointer;
-      font-weight:600;
-      font-size:13px;
-    }
-    .tab.active{
-      background: rgba(106,169,255,.18);
-      color: var(--text);
-      border:1px solid rgba(106,169,255,.35);
-    }
+    .wrap{max-width:980px;margin:0 auto;padding:18px 14px 40px}
+    header{display:flex;gap:12px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}
+    h1{margin:0;font-size:22px;letter-spacing:.2px}
+    .subtitle{margin:2px 0 0;color:var(--muted);font-size:13px}
 
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-    @media (min-width: 860px){
-      .grid{grid-template-columns: 1.1fr .9fr}
-    }
+    .tabs{display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:6px}
+    .tab{border:0;background:transparent;color:var(--muted);padding:10px 12px;border-radius:999px;cursor:pointer;font-weight:600;font-size:13px}
+    .tab.active{background:rgba(106,169,255,.18);color:var(--text);border:1px solid rgba(106,169,255,.35)}
 
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border:1px solid rgba(255,255,255,.08);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-    .card .hd{
-      padding: 14px 14px 10px;
-      display:flex; justify-content:space-between; align-items:center; gap:10px;
-      border-bottom: 1px solid rgba(255,255,255,.06);
-      background: rgba(0,0,0,.12);
-    }
-    .card .hd h2{
-      margin:0; font-size: 14px; letter-spacing:.2px;
-      color: var(--text);
-    }
-    .card .bd{padding: 14px}
-    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
+    @media (min-width:860px){.grid{grid-template-columns:1.1fr .9fr}}
+
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    .card .hd{padding:14px 14px 10px;display:flex;justify-content:space-between;align-items:center;gap:10px;
+      border-bottom:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.12)}
+    .card .hd h2{margin:0;font-size:14px;letter-spacing:.2px}
+    .card .bd{padding:14px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
     .row > *{flex:1 1 auto}
-    .muted{color:var(--muted); font-size:12px}
+    .muted{color:var(--muted);font-size:12px}
     .sep{height:10px}
 
-    .big{
-      font-variant-numeric: tabular-nums;
-      font-size: 54px;
-      line-height: 1;
-      letter-spacing: .5px;
-      margin: 0;
-    }
-    .phase{
-      margin-top: 6px;
-      font-size: 15px;
-      color: var(--muted);
-      letter-spacing:.2px;
-    }
-    .pill{
-      display:inline-flex; align-items:center; gap:8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,.08);
-      background: rgba(255,255,255,.03);
-      font-size: 12px;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-    .pill b{color:var(--text); font-weight:700}
+    .big{font-variant-numeric:tabular-nums;font-size:54px;line-height:1;letter-spacing:.5px;margin:0}
+    .phase{margin-top:6px;font-size:15px;color:var(--muted);letter-spacing:.2px}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);font-size:12px;color:var(--muted);white-space:nowrap}
+    .pill b{color:var(--text);font-weight:700}
 
-    .btnbar{display:flex; gap:10px; flex-wrap:wrap}
+    .btnbar{display:flex;gap:10px;flex-wrap:wrap}
     button{
       border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      padding: 12px 14px;
-      border-radius: 14px;
-      cursor:pointer;
-      font-weight:700;
-      letter-spacing:.2px;
-      transition: transform .04s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
+      background:rgba(255,255,255,.06);
+      color:var(--text);
+      padding:12px 14px;border-radius:14px;
+      cursor:pointer;font-weight:700;letter-spacing:.2px;
+      transition:transform .04s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
       user-select:none;
     }
-    button:active{transform: scale(.99)}
-    button.primary{
-      background: rgba(106,169,255,.22);
-      border-color: rgba(106,169,255,.40);
-    }
-    button.good{
-      background: rgba(124,255,193,.18);
-      border-color: rgba(124,255,193,.35);
-    }
-    button.warn{
-      background: rgba(255,204,102,.15);
-      border-color: rgba(255,204,102,.35);
-    }
-    button.danger{
-      background: rgba(255,106,106,.16);
-      border-color: rgba(255,106,106,.35);
-    }
-    button:disabled{opacity:.45; cursor:not-allowed}
+    button:active{transform:scale(.99)}
+    button.primary{background:rgba(106,169,255,.22);border-color:rgba(106,169,255,.40)}
+    button.good{background:rgba(124,255,193,.18);border-color:rgba(124,255,193,.35)}
+    button.warn{background:rgba(255,204,102,.15);border-color:rgba(255,204,102,.35)}
+    button.danger{background:rgba(255,106,106,.16);border-color:rgba(255,106,106,.35)}
+    button:disabled{opacity:.45;cursor:not-allowed}
+    .tinybtn{padding:9px 10px;border-radius:12px;font-size:12px;font-weight:800}
 
     .control{
       display:grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      align-items:center;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.08);
+      grid-template-columns:1fr auto;
+      gap:10px;align-items:center;
+      padding:10px 12px;border-radius:14px;
+      background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
     }
-    .control label{font-weight:700; font-size:13px}
-    .control .val{
-      font-variant-numeric: tabular-nums;
-      font-weight:800;
-      color: var(--text);
-      min-width: 80px;
-      text-align:right;
-    }
+    .control label{font-weight:700;font-size:13px}
+    .control .val{font-variant-numeric:tabular-nums;font-weight:800;color:var(--text);min-width:120px;text-align:right}
     input[type="range"]{width:100%}
-    input[type="checkbox"]{transform: scale(1.15)}
-    input[type="number"]{
-      width: 90px;
-      padding: 10px 10px;
-      border-radius: 12px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
-      color: var(--text);
-      font-weight:700;
-    }
+    input[type="checkbox"]{transform:scale(1.15)}
     textarea{
-      width:100%;
-      min-height: 160px;
-      padding: 12px;
-      border-radius: 14px;
+      width:100%;min-height:160px;padding:12px;border-radius:14px;
       border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
-      color: var(--text);
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      font-size: 12px;
-    }
-    .tinybtn{
-      padding: 9px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight:800;
+      background:rgba(0,0,0,.18);color:var(--text);
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+      font-size:12px;
     }
 
-    .list{
-      display:flex; flex-direction:column; gap:8px;
-    }
+    .list{display:flex;flex-direction:column;gap:8px}
     .item{
-      display:flex; justify-content:space-between; gap:10px; align-items:flex-start;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.08);
+      display:flex;justify-content:space-between;gap:10px;align-items:flex-start;
+      padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
     }
-    .item .name{font-weight:800; font-size:13px}
-    .item .note{color:var(--muted); font-size:12px; margin-top:2px}
-    .item .rt{color:var(--muted); font-size:12px; white-space:nowrap}
+    .item .name{font-weight:800;font-size:13px}
+    .item .note{color:var(--muted);font-size:12px;margin-top:2px}
+    .item .rt{color:var(--muted);font-size:12px;white-space:nowrap}
     .hidden{display:none !important;}
-
-    .footerNote{
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.35;
+    .footerNote{margin-top:10px;color:var(--muted);font-size:12px;line-height:1.35}
+    .hintBox{
+      padding:10px 12px;border-radius:14px;
+      background:rgba(124,255,193,.08);
+      border:1px solid rgba(124,255,193,.20);
+      color:var(--muted);font-size:12px;line-height:1.35
     }
+    code.inline{font-family:ui-monospace,Menlo,Monaco,Consolas,monospace;font-size:12px;color:var(--text)}
   </style>
 </head>
 <body>
@@ -228,7 +116,7 @@
     <header>
       <div>
         <h1>CO₂ Tolerance Timer</h1>
-        <div class="subtitle">Adjust hold + total duration. Sound + vibration on phase changes.</div>
+        <div class="subtitle">Now supports per-cycle arrays via JSON import.</div>
       </div>
       <div class="tabs" role="tablist" aria-label="Sections">
         <button class="tab active" id="tab-timer" role="tab" aria-selected="true">Timer</button>
@@ -246,22 +134,32 @@
           <div class="bd">
             <p class="big" id="phaseTime">00:00</p>
             <div class="phase" id="phaseLabel">Ready</div>
+
             <div class="sep"></div>
             <div class="row">
               <span class="pill"><span>Total left</span> <b id="totalLeft">00:00</b></span>
               <span class="pill"><span>Elapsed</span> <b id="elapsed">00:00</b></span>
               <span class="pill"><span>Status</span> <b id="status">Stopped</b></span>
             </div>
+
+            <div class="sep"></div>
+            <div class="row">
+              <span class="pill"><span>Current hold</span> <b id="curHold">—</b></span>
+              <span class="pill"><span>Current rest</span> <b id="curRest">—</b></span>
+              <span class="pill"><span>Mode</span> <b id="mode">Single</b></span>
+            </div>
+
             <div class="sep"></div>
             <div class="btnbar">
               <button class="primary" id="startBtn">Start</button>
               <button class="good" id="pauseBtn" disabled>Pause</button>
               <button class="good" id="resumeBtn" disabled>Resume</button>
               <button class="danger" id="stopBtn" disabled>Stop</button>
-              <button class="tinybtn" id="resetSettingsBtn" title="Resets settings to defaults">Reset settings</button>
+              <button class="tinybtn" id="resetSettingsBtn" title="Resets settings to defaults" style="margin-left:auto">Reset settings</button>
             </div>
+
             <div class="footerNote">
-              Notes: CO₂ tolerance work can make you lightheaded. Do this seated, stop if you feel unwell, and don’t do it in water or while driving.
+              Safety: do this seated. Stop if you feel unwell. Don’t do breath holds in water or while driving.
             </div>
           </div>
         </div>
@@ -272,10 +170,20 @@
             <span class="pill"><span>Saved</span> <b id="savedState">Yes</b></span>
           </div>
           <div class="bd">
+
+            <div class="hintBox">
+              JSON arrays: set <code class="inline">holdSec</code> and/or <code class="inline">restSec</code> to arrays.
+              Example:<br>
+              <code class="inline">"holdSec":[35,40,45], "restSec":[30,25,20]</code><br>
+              The timer uses the next index each cycle and then holds at the last value.
+            </div>
+
+            <div class="sep"></div>
+
             <div class="control">
               <div>
                 <label for="holdSec">Hold time (seconds)</label>
-                <div class="muted">Reasonable range: ~25–90s (you can go wider if you want)</div>
+                <div class="muted">Slider controls single-value mode (JSON can override with arrays)</div>
               </div>
               <div class="val" id="holdVal">45s</div>
               <input id="holdSec" type="range" min="10" max="120" step="5" />
@@ -287,7 +195,7 @@
             <div class="control">
               <div>
                 <label for="restSec">Breathe/rest time (seconds)</label>
-                <div class="muted">Time between holds (normal breathing)</div>
+                <div class="muted">Slider controls single-value mode (JSON can override with arrays)</div>
               </div>
               <div class="val" id="restVal">20s</div>
               <input id="restSec" type="range" min="5" max="90" step="5" />
@@ -299,7 +207,6 @@
             <div class="control">
               <div>
                 <label for="totalMin">Total workout duration (minutes)</label>
-                <div class="muted">Your stated range: ~3–20 min</div>
               </div>
               <div class="val" id="totalVal">8:00</div>
               <input id="totalMin" type="range" min="3" max="20" step="1" />
@@ -311,7 +218,7 @@
             <div class="control">
               <div>
                 <label>Hold cue</label>
-                <div class="muted">Choose wording for the hold phase</div>
+                <div class="muted">Wording for the hold phase</div>
               </div>
               <div class="val">
                 <label style="display:flex;gap:10px;align-items:center;justify-content:flex-end">
@@ -358,8 +265,9 @@
               <button class="tinybtn" id="copySettingsBtn">Copy settings JSON</button>
               <button class="tinybtn" id="loadSettingsBtn">Load JSON</button>
             </div>
+
             <div class="sep"></div>
-            <textarea id="jsonBox" spellcheck="false" placeholder='Settings JSON will appear here. You can paste a JSON object and tap "Load JSON".'></textarea>
+            <textarea id="jsonBox" spellcheck="false" placeholder='Paste JSON here and tap "Load JSON".'></textarea>
           </div>
         </div>
 
@@ -379,12 +287,12 @@
       <div class="grid">
         <div class="card" style="grid-column:1/-1">
           <div class="hd">
-            <h2>Tendon Strengthening (quick template)</h2>
+            <h2>Tendon Routine (editable)</h2>
             <span class="pill"><span>Editable</span> <b>Yes</b></span>
           </div>
           <div class="bd">
             <div class="muted" style="margin-bottom:10px">
-              This is a simple checklist you can tweak. If you want the exact routine we discussed earlier, tell me what moves you want and I’ll lock it in.
+              Simple checklist you can tweak anytime.
             </div>
 
             <div class="list" id="tendonList"></div>
@@ -398,7 +306,7 @@
             </div>
 
             <div class="sep"></div>
-            <textarea id="tendonJson" spellcheck="false" placeholder='Routine JSON will appear here. Paste JSON and tap "Load JSON".'></textarea>
+            <textarea id="tendonJson" spellcheck="false" placeholder='Paste routine JSON here and tap "Load JSON".'></textarea>
           </div>
         </div>
       </div>
@@ -427,7 +335,7 @@
     function nowMs(){ return performance.now(); }
 
     /***********************
-     * State (Timer)
+     * Defaults + storage
      ***********************/
     const DEFAULTS = {
       holdSec: 45,
@@ -439,28 +347,43 @@
       volume: 70
     };
 
-    const STORAGE_KEY = "co2_timer_settings_v2";
+    const STORAGE_KEY = "co2_timer_settings_v3";
     const TIMER_LOG_KEY = "co2_timer_log_v2";
 
+    /***********************
+     * Timer State
+     ***********************/
     const timer = {
       running: false,
       paused: false,
       phase: "ready", // ready | prep | rest | hold | done
-      cycle: 0,
+      cycle: 0,       // displayed cycle count starts at 1 when first rest begins
       totalTargetSec: 0,
       elapsedSec: 0,
       phaseRemainingSec: 0,
 
+      // per-cycle schedule (Option 2)
+      schedule: {
+        mode: "single", // "single" | "array"
+        holdList: null, // number[] or null
+        restList: null, // number[] or null
+        holdSingle: 0,
+        restSingle: 0
+      },
+
       // internal timekeeping
       lastTickMs: 0,
       accumMs: 0,
-      phasePlan: null, // {name, durSec}
+
+      // current phase plan
+      phasePlan: null, // {name, durSec, kind}
+
+      // audio
       audio: null
     };
 
     /***********************
-     * Audio (Web Audio API)
-     * Reliable on iOS if created after a user gesture (Start/Resume)
+     * Audio
      ***********************/
     function ensureAudio(){
       if (timer.audio) return timer.audio;
@@ -475,7 +398,7 @@
     function applyVolume(){
       const vol = clamp(+$("volume").value, 0, 100) / 100;
       $("volVal").textContent = `${Math.round(vol*100)}%`;
-      if (timer.audio) timer.audio.gain.gain.value = vol * 0.35; // cap to a safe-ish level
+      if (timer.audio) timer.audio.gain.gain.value = vol * 0.35;
     }
 
     function beep(pattern="short"){
@@ -489,17 +412,14 @@
                   (pattern === "end") ? [0, .12, .24, .36] :
                   [0];
 
-      seq.forEach((dt, i) => {
+      seq.forEach(() => {
         const o = ctx.createOscillator();
         o.type = "sine";
         o.frequency.value = (pattern === "end") ? 880 : (pattern === "start" ? 740 : 660);
         o.connect(gain);
-        const on = t0 + dt;
-        const off = on + (pattern === "short" ? 0.09 : 0.10);
-        try{
-          o.start(on);
-          o.stop(off);
-        }catch(e){}
+        const on = ctx.currentTime + seq.shift();
+        const off = on + 0.10;
+        try{ o.start(on); o.stop(off); }catch(e){}
       });
     }
 
@@ -537,8 +457,6 @@
 
       const log = $("log");
       log.prepend(el);
-
-      // keep log at a sane length
       while (log.children.length > 50) log.removeChild(log.lastChild);
       $("logCount").textContent = String(log.children.length);
       saveLog();
@@ -561,7 +479,6 @@
         const items = JSON.parse(raw);
         $("log").innerHTML = "";
         items.reverse().forEach(it => {
-          // reverse because addLog prepends; we want same visual order
           const el = document.createElement("div");
           el.className = "item";
           const left = document.createElement("div");
@@ -572,14 +489,15 @@
           const name = document.createElement("div");
           name.className = "name";
           name.textContent = it.name || "";
-
           left.appendChild(name);
+
           if (it.note){
             const note = document.createElement("div");
             note.className = "note";
             note.textContent = it.note;
             left.appendChild(note);
           }
+
           el.appendChild(left);
           el.appendChild(right);
           $("log").prepend(el);
@@ -620,8 +538,7 @@
     function syncSettingLabels(){
       $("holdVal").textContent = `${+$("holdSec").value}s`;
       $("restVal").textContent = `${+$("restSec").value}s`;
-      const totalSec = (+$("totalMin").value) * 60;
-      $("totalVal").textContent = fmtMSS(totalSec);
+      $("totalVal").textContent = fmtMSS((+$("totalMin").value)*60);
       $("volVal").textContent = `${+$("volume").value}%`;
     }
 
@@ -647,6 +564,55 @@
     }
 
     /***********************
+     * Option 2: schedule parsing
+     ***********************/
+    function normalizeNumArray(x){
+      if (!Array.isArray(x)) return null;
+      const out = x.map(v => Number(v)).filter(v => Number.isFinite(v) && v > 0);
+      return out.length ? out : null;
+    }
+
+    function buildScheduleFromObject(obj){
+      // obj can contain holdSec/restSec as number OR array
+      const holdArr = normalizeNumArray(obj.holdSec);
+      const restArr = normalizeNumArray(obj.restSec);
+
+      const holdSingle = Number.isFinite(Number(obj.holdSec)) ? Number(obj.holdSec) : DEFAULTS.holdSec;
+      const restSingle = Number.isFinite(Number(obj.restSec)) ? Number(obj.restSec) : DEFAULTS.restSec;
+
+      const mode = (holdArr || restArr) ? "array" : "single";
+
+      return {
+        mode,
+        holdList: holdArr,
+        restList: restArr,
+        holdSingle: clamp(holdSingle, 5, 600),
+        restSingle: clamp(restSingle, 3, 600)
+      };
+    }
+
+    function getHoldForCycle(cycleIndex0){
+      // cycleIndex0: 0 for first hold/rest pair after prep
+      if (timer.schedule.mode !== "array"){
+        return timer.schedule.holdSingle;
+      }
+      const list = timer.schedule.holdList;
+      if (!list || !list.length) return timer.schedule.holdSingle;
+      const idx = Math.min(cycleIndex0, list.length - 1);
+      return clamp(list[idx], 5, 600);
+    }
+
+    function getRestForCycle(cycleIndex0){
+      if (timer.schedule.mode !== "array"){
+        return timer.schedule.restSingle;
+      }
+      const list = timer.schedule.restList;
+      if (!list || !list.length) return timer.schedule.restSingle;
+      const idx = Math.min(cycleIndex0, list.length - 1);
+      return clamp(list[idx], 3, 600);
+    }
+
+    /***********************
      * Timer Engine
      ***********************/
     function setStatus(text){ $("status").textContent = text; }
@@ -655,25 +621,44 @@
       return $("holdOnInhale").checked ? "Inhale, then HOLD" : "Exhale, then HOLD";
     }
 
+    function setModeUI(){
+      $("mode").textContent = (timer.schedule.mode === "array") ? "Array" : "Single";
+    }
+
+    function updateCurrentDurationsUI(){
+      // For cycle display, we show the "current" cycle's values (based on cycle number shown)
+      // cycle displayed starts at 1 when first rest begins, so cycleIndex0 = max(cycle-1,0)
+      const idx0 = Math.max(timer.cycle - 1, 0);
+      const h = getHoldForCycle(idx0);
+      const r = getRestForCycle(idx0);
+      $("curHold").textContent = `${h}s`;
+      $("curRest").textContent = `${r}s`;
+    }
+
     function nextPhasePlan(){
-      const s = getSettings();
+      // cycleIndex0: 0-based index for the schedule arrays
+      const cycleIndex0 = Math.max(timer.cycle - 1, 0);
+
       if (timer.phase === "ready"){
         timer.phase = "prep";
-        return { name: "Get ready", durSec: 5 };
+        return { kind:"prep", name:"Get ready", durSec: 5 };
       }
       if (timer.phase === "prep"){
         timer.phase = "rest";
-        timer.cycle = 1;
-        return { name: "Breathe normally", durSec: s.restSec };
+        timer.cycle = 1; // now we're in cycle 1
+        const r = getRestForCycle(0);
+        return { kind:"rest", name:"Breathe normally", durSec: r };
       }
       if (timer.phase === "rest"){
         timer.phase = "hold";
-        return { name: cueTextForHold(), durSec: s.holdSec };
+        const h = getHoldForCycle(cycleIndex0);
+        return { kind:"hold", name: cueTextForHold(), durSec: h };
       }
       if (timer.phase === "hold"){
         timer.phase = "rest";
         timer.cycle += 1;
-        return { name: "Breathe normally", durSec: s.restSec };
+        const r = getRestForCycle(timer.cycle - 1); // because cycle increments first
+        return { kind:"rest", name:"Breathe normally", durSec: r };
       }
       return null;
     }
@@ -681,30 +666,38 @@
     function updateUI(){
       $("cycle").textContent = String(timer.cycle);
       $("elapsed").textContent = fmtMMSS(timer.elapsedSec);
-      const totalLeft = Math.max(0, timer.totalTargetSec - timer.elapsedSec);
-      $("totalLeft").textContent = fmtMMSS(totalLeft);
+      $("totalLeft").textContent = fmtMMSS(Math.max(0, timer.totalTargetSec - timer.elapsedSec));
       $("phaseTime").textContent = fmtMMSS(timer.phaseRemainingSec);
-      $("phaseLabel").textContent = (timer.phase === "hold") ? cueTextForHold() :
-                                   (timer.phase === "rest") ? "Breathe normally" :
-                                   (timer.phase === "prep") ? "Get ready" :
-                                   (timer.phase === "done") ? "Done" : "Ready";
+
+      $("phaseLabel").textContent =
+        (timer.phase === "hold") ? cueTextForHold() :
+        (timer.phase === "rest") ? "Breathe normally" :
+        (timer.phase === "prep") ? "Get ready" :
+        (timer.phase === "done") ? "Done" : "Ready";
+
+      setModeUI();
+      updateCurrentDurationsUI();
     }
 
     function startSession(){
       if (timer.running) return;
-      const s = getSettings();
 
-      // create audio context (if enabled) in response to user gesture
-      if (s.soundOn) ensureAudio();
+      // schedule is based on CURRENT stored settings (single) unless JSON imported (array)
+      const base = getSettings();
+      timer.schedule = buildScheduleFromObject(base); // starts in single mode by default
+
+      // If user pasted JSON in box and forgot to hit "Load", don't auto-load (too risky)
+      // They must press Load JSON to enable arrays.
+
+      if (base.soundOn) ensureAudio();
 
       timer.running = true;
       timer.paused = false;
       timer.phase = "ready";
       timer.cycle = 0;
       timer.elapsedSec = 0;
-      timer.totalTargetSec = s.totalMin * 60;
+      timer.totalTargetSec = base.totalMin * 60;
 
-      // prime phase
       timer.phasePlan = nextPhasePlan();
       timer.phaseRemainingSec = timer.phasePlan?.durSec ?? 0;
 
@@ -717,11 +710,12 @@
       $("stopBtn").disabled = false;
 
       setStatus("Running");
-      addLog("Started", `Hold ${s.holdSec}s / Rest ${s.restSec}s / Total ${s.totalMin}m`);
+      addLog("Started", `${timer.schedule.mode === "array" ? "Array" : "Single"} mode • Total ${base.totalMin}m`);
       beep("start");
       vibrate(60);
-      tickLoop();
+
       updateUI();
+      tickLoop();
     }
 
     function pauseSession(){
@@ -731,17 +725,13 @@
       $("pauseBtn").disabled = true;
       $("resumeBtn").disabled = false;
       addLog("Paused", "");
-      beep("short");
       vibrate(40);
       updateUI();
     }
 
     function resumeSession(){
       if (!timer.running || !timer.paused) return;
-
-      // audio resume after user gesture (helpful on iOS)
       if ($("soundOn").checked) ensureAudio();
-
       timer.paused = false;
       timer.lastTickMs = nowMs();
       timer.accumMs = 0;
@@ -749,7 +739,6 @@
       $("pauseBtn").disabled = false;
       $("resumeBtn").disabled = true;
       addLog("Resumed", "");
-      beep("short");
       vibrate(40);
       tickLoop();
     }
@@ -769,7 +758,6 @@
 
       if (manual){
         addLog("Stopped", `Elapsed ${fmtMMSS(timer.elapsedSec)}`);
-        beep("end");
         vibrate(120);
       }
       updateUI();
@@ -783,16 +771,24 @@
       }
       timer.phaseRemainingSec = timer.phasePlan.durSec;
 
-      // signal phase change
-      addLog("Phase", timer.phasePlan.name);
+      // log with per-cycle values when entering a hold/rest
+      if (timer.phasePlan.kind === "rest" || timer.phasePlan.kind === "hold"){
+        const idx0 = Math.max(timer.cycle - 1, 0);
+        const h = getHoldForCycle(idx0);
+        const r = getRestForCycle(idx0);
+        const detail = `Cycle ${timer.cycle} • Hold ${h}s • Rest ${r}s`;
+        addLog("Phase", `${timer.phasePlan.kind.toUpperCase()} • ${detail}`);
+      } else {
+        addLog("Phase", timer.phasePlan.name);
+      }
+
       beep("phase");
       vibrate(70);
       updateUI();
     }
 
     function tickLoop(){
-      if (!timer.running) return;
-      if (timer.paused) return;
+      if (!timer.running || timer.paused) return;
 
       const ms = nowMs();
       const dt = ms - timer.lastTickMs;
@@ -802,13 +798,9 @@
       while (timer.accumMs >= 1000){
         timer.accumMs -= 1000;
 
-        // total time
         timer.elapsedSec += 1;
-
-        // phase time
         timer.phaseRemainingSec -= 1;
 
-        // end condition (hard stop at total duration)
         if (timer.elapsedSec >= timer.totalTargetSec){
           timer.running = false;
           timer.phase = "done";
@@ -821,13 +813,11 @@
 
           setStatus("Done");
           addLog("Completed", `Total ${fmtMMSS(timer.totalTargetSec)}`);
-          beep("end");
           vibrate(150);
           updateUI();
           return;
         }
 
-        // phase change
         if (timer.phaseRemainingSec <= 0){
           advancePhase();
         } else {
@@ -839,38 +829,85 @@
     }
 
     /***********************
-     * Settings JSON import/export
+     * Settings JSON import/export (now supports arrays)
      ***********************/
     function settingsToJson(){
+      // export current sliders + toggles (single mode),
+      // AND if schedule is array mode (because user imported), export arrays too.
+      // We'll store imported arrays in timer.schedule ONLY during a session,
+      // so exporting arrays is handled by the json box after load.
       const s = getSettings();
       return JSON.stringify(s, null, 2);
+    }
+
+    function applyLoadedObjectToUI(obj){
+      // Apply toggles and totalMin if present
+      if (obj.totalMin != null) $("totalMin").value = clamp(Number(obj.totalMin), 3, 20);
+      if (obj.holdOnInhale != null) $("holdOnInhale").checked = !!obj.holdOnInhale;
+      if (obj.soundOn != null) $("soundOn").checked = !!obj.soundOn;
+      if (obj.vibeOn != null) $("vibeOn").checked = !!obj.vibeOn;
+      if (obj.volume != null) $("volume").value = clamp(Number(obj.volume), 0, 100);
+
+      // If holdSec/restSec are numbers, apply to sliders
+      if (!Array.isArray(obj.holdSec) && obj.holdSec != null && Number.isFinite(Number(obj.holdSec))){
+        $("holdSec").value = clamp(Number(obj.holdSec), 10, 120);
+      }
+      if (!Array.isArray(obj.restSec) && obj.restSec != null && Number.isFinite(Number(obj.restSec))){
+        $("restSec").value = clamp(Number(obj.restSec), 5, 90);
+      }
+
+      syncSettingLabels();
+      applyVolume();
     }
 
     function loadJsonIntoSettings(){
       const raw = $("jsonBox").value.trim();
       if (!raw) return;
+
       try{
         const obj = JSON.parse(raw);
-        setSettings({ ...DEFAULTS, ...obj });
+
+        // Save "base" settings for toggles + slider numbers (so they persist)
+        applyLoadedObjectToUI(obj);
         saveSettings();
-        addLog("Settings loaded", "From JSON");
+
+        // Store array-mode presets in localStorage so the NEXT start can use them too.
+        // We'll use a separate key so it doesn't break old saves.
+        localStorage.setItem("co2_timer_arrays_v1", JSON.stringify({
+          holdSec: Array.isArray(obj.holdSec) ? obj.holdSec : null,
+          restSec: Array.isArray(obj.restSec) ? obj.restSec : null
+        }));
+
+        addLog("Settings loaded", `JSON (${(Array.isArray(obj.holdSec)||Array.isArray(obj.restSec)) ? "array" : "single"} mode)`);
+        markSaved(true);
+        updateUI();
       }catch(e){
         addLog("JSON error", "Could not parse settings JSON");
         alert("Could not parse JSON. Make sure it's a valid JSON object.");
       }
     }
 
-    async function copyText(text){
+    function loadArrayOverrides(){
       try{
-        await navigator.clipboard.writeText(text);
-        return true;
+        const raw = localStorage.getItem("co2_timer_arrays_v1");
+        if (!raw) return null;
+        const obj = JSON.parse(raw);
+        const holdArr = Array.isArray(obj.holdSec) ? obj.holdSec : null;
+        const restArr = Array.isArray(obj.restSec) ? obj.restSec : null;
+        if (!holdArr && !restArr) return null;
+        return { holdSec: holdArr, restSec: restArr };
       }catch(e){
-        return false;
+        return null;
       }
     }
 
+    async function copyText(text){
+      try{ await navigator.clipboard.writeText(text); return true; }
+      catch(e){ return false; }
+    }
+
     /***********************
-     * Tendon routine (simple editable list)
+     * Tendon routine
      ***********************/
     const TENDON_KEY = "tendon_routine_v1";
     let tendon = [];
@@ -884,18 +921,12 @@
         { name: "Calf isometrics", note: "4 x 30–45s", done: false }
       ];
     }
-
-    function saveTendon(){
-      localStorage.setItem(TENDON_KEY, JSON.stringify(tendon));
-    }
-
+    function saveTendon(){ localStorage.setItem(TENDON_KEY, JSON.stringify(tendon)); }
     function loadTendon(){
       try{
         const raw = localStorage.getItem(TENDON_KEY);
         tendon = raw ? JSON.parse(raw) : defaultTendon();
-      }catch(e){
-        tendon = defaultTendon();
-      }
+      }catch(e){ tendon = defaultTendon(); }
       renderTendon();
     }
 
@@ -907,7 +938,6 @@
         row.className = "item";
 
         const left = document.createElement("div");
-
         const top = document.createElement("div");
         top.className = "name";
         top.style.display = "flex";
@@ -917,10 +947,7 @@
         const cb = document.createElement("input");
         cb.type = "checkbox";
         cb.checked = !!it.done;
-        cb.addEventListener("change", () => {
-          it.done = cb.checked;
-          saveTendon();
-        });
+        cb.addEventListener("change", () => { it.done = cb.checked; saveTendon(); });
 
         const nameInput = document.createElement("input");
         nameInput.type = "text";
@@ -932,10 +959,7 @@
         nameInput.style.background = "rgba(0,0,0,.18)";
         nameInput.style.color = "var(--text)";
         nameInput.style.fontWeight = "800";
-        nameInput.addEventListener("input", () => {
-          it.name = nameInput.value;
-          saveTendon();
-        });
+        nameInput.addEventListener("input", () => { it.name = nameInput.value; saveTendon(); });
 
         top.appendChild(cb);
         top.appendChild(nameInput);
@@ -952,10 +976,7 @@
         noteInput.style.background = "rgba(0,0,0,.18)";
         noteInput.style.color = "var(--text)";
         noteInput.style.fontWeight = "700";
-        noteInput.addEventListener("input", () => {
-          it.note = noteInput.value;
-          saveTendon();
-        });
+        noteInput.addEventListener("input", () => { it.note = noteInput.value; saveTendon(); });
 
         left.appendChild(top);
         left.appendChild(noteInput);
@@ -991,11 +1012,7 @@
       try{
         const obj = JSON.parse(raw);
         if (!Array.isArray(obj)) throw new Error("Not an array");
-        tendon = obj.map(x => ({
-          name: String(x.name ?? ""),
-          note: String(x.note ?? ""),
-          done: !!x.done
-        }));
+        tendon = obj.map(x => ({ name: String(x.name ?? ""), note: String(x.note ?? ""), done: !!x.done }));
         saveTendon();
         renderTendon();
       }catch(e){
@@ -1007,47 +1024,82 @@
      * Tabs
      ***********************/
     function showTab(which){
-      const timerView = $("view-timer");
-      const tendonView = $("view-tendon");
-      const t1 = $("tab-timer");
-      const t2 = $("tab-tendon");
-
       const isTimer = which === "timer";
-      timerView.classList.toggle("hidden", !isTimer);
-      tendonView.classList.toggle("hidden", isTimer);
+      $("view-timer").classList.toggle("hidden", !isTimer);
+      $("view-tendon").classList.toggle("hidden", isTimer);
 
-      t1.classList.toggle("active", isTimer);
-      t2.classList.toggle("active", !isTimer);
-      t1.setAttribute("aria-selected", isTimer ? "true" : "false");
-      t2.setAttribute("aria-selected", !isTimer ? "true" : "false");
+      $("tab-timer").classList.toggle("active", isTimer);
+      $("tab-tendon").classList.toggle("active", !isTimer);
+      $("tab-timer").setAttribute("aria-selected", isTimer ? "true" : "false");
+      $("tab-tendon").setAttribute("aria-selected", !isTimer ? "true" : "false");
     }
 
     /***********************
-     * Wire up UI
+     * Wire up
      ***********************/
     function wire(){
-      // tabs
       $("tab-timer").addEventListener("click", () => showTab("timer"));
       $("tab-tendon").addEventListener("click", () => showTab("tendon"));
 
-      // settings changes
       ["holdSec","restSec","totalMin","holdOnInhale","soundOn","vibeOn","volume"].forEach(id => {
         $(id).addEventListener("input", () => {
           syncSettingLabels();
           applyVolume();
           markSaved(false);
           saveSettings();
+          updateUI();
         });
         $(id).addEventListener("change", () => {
           syncSettingLabels();
           applyVolume();
           markSaved(false);
           saveSettings();
+          updateUI();
         });
       });
 
-      // buttons
-      $("startBtn").addEventListener("click", startSession);
+      $("startBtn").addEventListener("click", () => {
+        // If user previously imported arrays, apply them to schedule automatically at start.
+        // (This is the feature you want.)
+        const base = getSettings();
+        const overrides = loadArrayOverrides();
+        const merged = { ...base, ...(overrides || {}) };
+        timer.schedule = buildScheduleFromObject(merged);
+
+        startSessionAfterScheduleSet(base.totalMin);
+      });
+
+      function startSessionAfterScheduleSet(totalMin){
+        if (timer.running) return;
+        const base = getSettings();
+
+        if (base.soundOn) ensureAudio();
+
+        timer.running = true;
+        timer.paused = false;
+        timer.phase = "ready";
+        timer.cycle = 0;
+        timer.elapsedSec = 0;
+        timer.totalTargetSec = totalMin * 60;
+
+        timer.phasePlan = nextPhasePlan();
+        timer.phaseRemainingSec = timer.phasePlan?.durSec ?? 0;
+
+        timer.lastTickMs = nowMs();
+        timer.accumMs = 0;
+
+        $("startBtn").disabled = true;
+        $("pauseBtn").disabled = false;
+        $("resumeBtn").disabled = true;
+        $("stopBtn").disabled = false;
+
+        setStatus("Running");
+        addLog("Started", `${timer.schedule.mode === "array" ? "Array" : "Single"} mode • Total ${totalMin}m`);
+        vibrate(60);
+        updateUI();
+        tickLoop();
+      }
+
       $("pauseBtn").addEventListener("click", pauseSession);
       $("resumeBtn").addEventListener("click", resumeSession);
       $("stopBtn").addEventListener("click", () => stopSession(true));
@@ -1055,14 +1107,22 @@
       $("resetSettingsBtn").addEventListener("click", () => {
         if (timer.running) return;
         setSettings(DEFAULTS);
+        localStorage.removeItem("co2_timer_arrays_v1");
         saveSettings();
-        addLog("Settings reset", "");
+        addLog("Settings reset", "Cleared array presets too");
+        updateUI();
       });
 
-      // settings JSON
       $("copySettingsBtn").addEventListener("click", async () => {
-        const text = settingsToJson();
+        const base = getSettings();
+        const overrides = loadArrayOverrides();
+        const obj = { ...base };
+        if (overrides?.holdSec) obj.holdSec = overrides.holdSec;
+        if (overrides?.restSec) obj.restSec = overrides.restSec;
+
+        const text = JSON.stringify(obj, null, 2);
         $("jsonBox").value = text;
+
         const ok = await copyText(text);
         addLog("Settings copied", ok ? "Copied to clipboard" : "Copied to box (clipboard blocked)");
         if (!ok) alert("Copied into the box, but clipboard was blocked by the browser.");
@@ -1070,17 +1130,12 @@
 
       $("loadSettingsBtn").addEventListener("click", loadJsonIntoSettings);
 
-      // tendon
       $("tendonAdd").addEventListener("click", () => {
         tendon.unshift({ name: "New item", note: "", done: false });
         saveTendon();
         renderTendon();
       });
-      $("tendonClear").addEventListener("click", () => {
-        tendon = [];
-        saveTendon();
-        renderTendon();
-      });
+      $("tendonClear").addEventListener("click", () => { tendon = []; saveTendon(); renderTendon(); });
       $("tendonCopy").addEventListener("click", async () => {
         $("tendonJson").value = JSON.stringify(tendon, null, 2);
         const ok = await copyText($("tendonJson").value);
@@ -1088,14 +1143,13 @@
       });
       $("tendonLoad").addEventListener("click", tendonLoadFromJson);
 
-      // keyboard shortcuts
+      // spacebar controls
       window.addEventListener("keydown", (e) => {
         if (e.key === " "){
-          // avoid scrolling with spacebar if focused outside inputs
           const tag = (document.activeElement?.tagName || "").toLowerCase();
           if (tag !== "input" && tag !== "textarea"){
             e.preventDefault();
-            if (!timer.running) startSession();
+            if (!timer.running) $("startBtn").click();
             else if (timer.running && !timer.paused) pauseSession();
             else if (timer.running && timer.paused) resumeSession();
           }
@@ -1115,10 +1169,17 @@
       loadTendon();
       syncSettingLabels();
       applyVolume();
-      updateUI();
       setStatus("Stopped");
+
+      // show array vs single mode based on stored array presets
+      const base = getSettings();
+      const overrides = loadArrayOverrides();
+      const merged = { ...base, ...(overrides || {}) };
+      timer.schedule = buildScheduleFromObject(merged);
+
+      updateUI();
       wire();
-      addLog("Ready", "Adjust settings, then Start");
+      addLog("Ready", `Mode: ${timer.schedule.mode === "array" ? "Array (from JSON import)" : "Single (sliders)"}`);
     })();
   </script>
 </body>
