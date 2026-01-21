@@ -189,6 +189,7 @@
             <span class="pill"><span>Mode</span> <b id="mode">Loop</b></span>
             <span class="pill"><span>Sound</span> <b id="soundState">Off</b></span>
             <span class="pill"><span>Vibe</span> <b id="vibeState">On</b></span>
+            <span class="pill"><span>Voice</span> <b id="voiceState">Off</b></span>
           </div>
 
           <div class="sep"></div>
@@ -248,8 +249,8 @@
 
           <div class="control">
             <div>
-              <label>Sound + vibration</label>
-              <div class="muted">Sound works best after tapping Start/Resume (phone browser rule).</div>
+              <label>Sound + vibration + voice</label>
+              <div class="muted">Sound/voice work best after tapping Start/Resume (phone browser rule).</div>
             </div>
             <div class="val" style="display:flex;gap:14px;justify-content:flex-end;align-items:center">
               <label style="display:flex;gap:10px;align-items:center">
@@ -259,6 +260,10 @@
               <label style="display:flex;gap:10px;align-items:center">
                 <input type="checkbox" id="vibeOn" checked />
                 <span style="font-weight:900">Vibe</span>
+              </label>
+              <label style="display:flex;gap:10px;align-items:center">
+                <input type="checkbox" id="voiceOn" />
+                <span style="font-weight:900">Voice</span>
               </label>
             </div>
           </div>
@@ -389,6 +394,7 @@
       totalMin: 8,
       soundOn: false,
       vibeOn: true,
+      voiceOn: false,
       volume: 70
     };
 
@@ -396,6 +402,7 @@
      * Routine state
      ***************/
     let routine = defaultRoutine();
+    let speechUnlocked = false;
 
     /***************
      * Timer runtime state
@@ -536,6 +543,7 @@
           settings.totalMin = clamp(+s.totalMin || 8, 3, 30);
           settings.soundOn = !!s.soundOn;
           settings.vibeOn = (s.vibeOn === undefined) ? true : !!s.vibeOn;
+        settings.voiceOn = (s.voiceOn === undefined) ? false : !!s.voiceOn;
           settings.volume = clamp(+s.volume || 70, 0, 100);
         }
       }catch(e){}
@@ -748,14 +756,43 @@
       return clamp(st.sec - timer.remaining, 0, st.sec);
     }
 
+    function unlockSpeech(){
+      if (speechUnlocked) return;
+      if (!("speechSynthesis" in window) || typeof window.SpeechSynthesisUtterance !== "function") return;
+      try{
+        const u = new SpeechSynthesisUtterance(" ");
+        u.volume = 0;
+        window.speechSynthesis.speak(u);
+        speechUnlocked = true;
+      }catch(e){}
+    }
+
+    function speakCurrentStep(){
+      if (!settings.voiceOn) return;
+      if (!speechUnlocked) return;
+      if (!("speechSynthesis" in window) || typeof window.SpeechSynthesisUtterance !== "function") return;
+      const st = currentStep();
+      if (!st) return;
+      try{
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(String(st.label || ""));
+        u.rate = 1;
+        u.pitch = 1;
+        u.volume = 1;
+        window.speechSynthesis.speak(u);
+      }catch(e){}
+    }
+
     function onStepChange(reason){
       addLog(reason, stepSummary());
+      speakCurrentStep();
       beep("phase");
       vibrate(70);
     }
 
     function start(){
       if (timer.running) return;
+      unlockSpeech();
       if (!routine.steps.length) routine.steps = defaultRoutine().steps;
 
       // bind routine loop/total to settings (you can override via JSON import too)
@@ -789,6 +826,7 @@
       beep("start");
       vibrate(60);
 
+      speakCurrentStep();
       syncUI();
       tick();
     }
@@ -806,6 +844,7 @@
 
     function resume(){
       if (!timer.running || !timer.paused) return;
+      unlockSpeech();
       if (settings.soundOn) ensureAudio();
       timer.paused = false;
       timer.lastTick = performance.now();
@@ -815,6 +854,7 @@
       $("resumeBtn").disabled = true;
       addLog("Resumed");
       vibrate(40);
+      speakCurrentStep();
       tick();
     }
 
@@ -930,9 +970,11 @@
       $("totalVal").textContent = fmtMSS(settings.totalMin * 60);
       $("soundOn").checked = settings.soundOn;
       $("vibeOn").checked = settings.vibeOn;
+      $("voiceOn").checked = settings.voiceOn;
       $("volume").value = String(settings.volume);
       $("soundState").textContent = settings.soundOn ? "On" : "Off";
       $("vibeState").textContent = settings.vibeOn ? "On" : "Off";
+      $("voiceState").textContent = settings.voiceOn ? "On" : "Off";
       $("mode").textContent = settings.loop ? "Loop" : "Run once";
 
       // timer UI
@@ -1018,6 +1060,14 @@
       });
       $("vibeOn").addEventListener("change", () => {
         settings.vibeOn = $("vibeOn").checked;
+        markSaved(false);
+        saveAll();
+      });
+      $("voiceOn").addEventListener("change", () => {
+        settings.voiceOn = $("voiceOn").checked;
+        if (!settings.voiceOn && ("speechSynthesis" in window)){
+          try{ window.speechSynthesis.cancel(); }catch(e){}
+        }
         markSaved(false);
         saveAll();
       });
