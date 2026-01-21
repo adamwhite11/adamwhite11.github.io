@@ -197,12 +197,12 @@
             <button class="good" id="pauseBtn" disabled>Pause</button>
             <button class="good" id="resumeBtn" disabled>Resume</button>
             <button class="danger" id="stopBtn" disabled>Stop</button>
+          <button class="warn" id="prevBtn" disabled>Previous</button>
+          <button class="warn" id="nextBtn" disabled>Next</button>
           </div>
 
           <div class="sep"></div>
           <div class="row">
-            <button class="warn" id="prevBtn" disabled>Prev</button>
-            <button class="warn" id="nextBtn" disabled>Next</button>
             <button class="tiny" id="restartStepBtn" disabled>Restart step</button>
           </div>
 
@@ -717,6 +717,11 @@
       return routine.steps[clamp(timer.stepIndex, 0, routine.steps.length-1)];
     }
 
+    function resetTickClock(){
+      timer.lastTick = performance.now();
+      timer.accMs = 0;
+    }
+
     function setStepIndex(i){
       if (!routine.steps.length) return;
       if (settings.loop){
@@ -735,6 +740,12 @@
       const st = currentStep();
       if (!st) return "No steps";
       return `${st.type.toUpperCase()} • ${st.label} • ${st.sec}s`;
+    }
+
+    function currentStepElapsed(){
+      const st = currentStep();
+      if (!st) return 0;
+      return clamp(st.sec - timer.remaining, 0, st.sec);
     }
 
     function onStepChange(reason){
@@ -831,6 +842,7 @@
 
     function nextStep(){
       if (!timer.running) return;
+      const wasPaused = timer.paused;
       setStepIndex(timer.stepIndex + 1);
       onStepChange("Next");
     }
@@ -840,6 +852,7 @@
       setStepIndex(timer.stepIndex - 1);
       onStepChange("Prev");
     }
+
 
     function restartStep(){
       if (!timer.running) return;
